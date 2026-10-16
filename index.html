@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b0d14">
+<title>M-EI HO Messenger v2.26.41.4</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+ --bg:#0b0d14;
+ --panel:#131722;
+ --header:#171c29;
+ --accent:#8b7cff;
+ --accent2:#5e8bff;
+ --badge:#22c55e;
+ --text:#f1f3f9;
+ --muted:#929bad;
+ --border:#292f40;
+ --bubble:#1b2130;
+ --mine:#343052;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;min-height:100dvh}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer}
+button:disabled{opacity:.5;cursor:not-allowed}
+.hidden{display:none!important}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.logo{
+ width:100px;height:100px;border-radius:50%;
+ display:grid;place-items:center;background:transparent;color:var(--text);
+ border:2px solid var(--accent);font-size:55px;font-weight:900;
+ box-shadow:0 0 35px #8b7cff22;flex-shrink:0
+}
+#splash{
+ position:fixed;inset:0;z-index:1000;background:var(--bg);
+ display:flex;align-items:center;justify-content:center;flex-direction:column;
+ transition:opacity .4s
+}
+.brand{font-weight:800;letter-spacing:3px;margin-top:20px}
+.version{color:var(--muted);font-size:12px;margin-top:8px}
+
+#auth{
+ position:fixed;inset:0;z-index:1100;display:flex;
+ justify-content:center;align-items:center;padding:22px;
+ background:#080a10ed;overflow-y:auto
+}
+.auth-card{
+ width:100%;max-width:420px;padding:25px;
+ border-radius:20px;background:var(--panel);border:1px solid var(--border)
+}
+.auth-logo{text-align:center;margin-bottom:20px}
+.auth-logo .logo{margin:auto;width:76px;height:76px;font-size:42px}
+h1{font-size:23px;margin:15px 0 5px}
+.subtitle{color:var(--muted);font-size:14px;line-height:1.5}
+.field{
+ display:block;width:100%;background:var(--bg);color:var(--text);
+ border:1px solid var(--border);padding:14px;margin:12px 0;
+ border-radius:10px;outline:none
+}
+.field:focus{border-color:var(--accent)}
+.primary{
+ width:100%;padding:14px;background:var(--accent);color:white;
+ border:0;border-radius:10px;font-weight:bold;margin-top:8px
+}
+.secondary{
+ background:transparent;color:var(--text);border:1px solid var(--border);
+ padding:11px;border-radius:9px
+}
+.auth-switch{text-align:center;margin-top:18px;font-size:14px}
+.auth-switch button{color:var(--accent);background:none;border:0;font-weight:bold}
+#authStatus{color:#ffb4ab;font-size:13px;line-height:1.5;margin-top:12px;overflow-wrap:anywhere}
+.close-auth{
+ width:100%;margin-top:12px;padding:11px;background:transparent;
+ color:var(--muted);border:1px solid var(--border);border-radius:9px
+}
+
+#app{
+ max-width:900px;margin:auto;height:100dvh;height:100svh;
+ display:flex;flex-direction:column;overflow:hidden
+}
+.topbar{
+ background:var(--header);padding:13px 15px;display:flex;
+ align-items:center;justify-content:space-between;gap:10px;min-height:68px
+}
+.top-brand{font-size:19px;font-weight:800;letter-spacing:.4px}
+.top-brand span{color:var(--text)}
+.top-actions{display:flex;gap:8px;align-items:center}
+.icon-btn{background:transparent;border:0;color:var(--text);font-size:23px;padding:5px}
+.login-shortcut{
+ background:var(--accent);color:white;border:0;border-radius:9px;
+ padding:9px 11px;font-size:12px;font-weight:bold
+}
+.tabs{background:var(--header);display:flex;border-bottom:1px solid var(--border)}
+.tab{
+ flex:1;background:none;border:0;color:var(--muted);padding:15px 4px;
+ font-size:12px;font-weight:bold;border-bottom:3px solid transparent
+}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+#main{flex:1;min-height:0;position:relative;overflow:hidden}
+.screen{height:100%;overflow-y:auto}
+.section-head{
+ padding:16px;display:flex;align-items:center;
+ justify-content:space-between;gap:8px
+}
+.section-head h2{margin:0;font-size:19px}
+.search{
+ width:calc(100% - 28px);display:block;margin:0 14px 12px;
+ padding:12px 15px;border:1px solid var(--border);border-radius:10px;
+ outline:none;background:var(--header);color:var(--text)
+}
+.user-row{
+ display:flex;align-items:center;gap:13px;padding:13px 15px;
+ border-bottom:1px solid #ffffff0b;cursor:pointer
+}
+.user-row:active{background:var(--header)}
+.avatar{
+ flex-shrink:0;width:48px;height:48px;border-radius:50%;
+ background:#262b40;display:grid;place-items:center;overflow:hidden;font-size:20px
+}
+.avatar img,.profile-avatar img{width:100%;height:100%;object-fit:cover}
+.user-info{flex:1;min-width:0}
+.user-name{font-size:15px;font-weight:bold;overflow-wrap:anywhere}
+.user-preview{color:var(--muted);font-size:13px;margin-top:5px;overflow:hidden;text-overflow:ellipsis}
+
+/* Badge MEIHO : cercle vert, coche blanche, 15 px */
+.verified{
+ width:15px;height:15px;display:inline-flex;align-items:center;
+ justify-content:center;vertical-align:-2px;margin-left:3px;flex-shrink:0
+}
+.verified svg{width:15px;height:15px;display:block}
+.empty{color:var(--muted);text-align:center;padding:35px 20px;line-height:1.7}
+.guide{
+ margin:12px 15px;padding:17px;background:var(--panel);
+ border:1px solid var(--border);border-radius:14px
+}
+.guide h3{font-size:16px;margin:0 0 8px}
+.guide p{font-size:13px;line-height:1.7;color:var(--muted);margin:0}
+.guide-icon{
+ width:43px;height:43px;border-radius:14px;background:#8b7cff1b;
+ color:var(--accent);display:grid;place-items:center;font-size:22px;margin-bottom:12px
+}
+.notice{
+ padding:12px;margin:12px 15px;background:var(--header);
+ border-radius:10px;color:var(--muted);font-size:13px;line-height:1.6
+}
+.card{margin:12px 15px;padding:14px;background:var(--panel);border:1px solid var(--border);border-radius:12px}
+.card h3{margin:0 0 8px}
+.card p{white-space:pre-wrap;overflow-wrap:anywhere}
+
+#chat{
+ position:absolute;inset:0;background:var(--bg);
+ display:flex;flex-direction:column;z-index:5
+}
+.chat-head{
+ background:var(--header);padding:10px 12px;
+ display:flex;align-items:center;gap:12px;min-height:65px
+}
+.chat-title{flex:1;min-width:0}
+.chat-title strong{display:block;overflow-wrap:anywhere}
+.chat-title small{display:block;color:var(--muted);margin-top:5px}
+#messages{flex:1;overflow-y:auto;padding:15px 12px;display:flex;flex-direction:column;gap:8px}
+.message{
+ max-width:82%;padding:10px 12px 7px;border-radius:10px;background:var(--bubble);
+ overflow-wrap:anywhere;white-space:pre-wrap;align-self:flex-start
+}
+.message.mine{background:var(--mine);align-self:flex-end}
+.message-time{text-align:right;font-size:10px;color:#c0c3d4;margin-top:5px}
+#composer{display:flex;align-items:flex-end;gap:8px;padding:10px;background:var(--header)}
+#messageInput{
+ flex:1;min-width:0;max-height:120px;resize:none;border:0;outline:none;
+ border-radius:22px;padding:12px 15px;background:#252b3b;color:var(--text)
+}
+.send-btn{
+ background:var(--accent);color:white;border:0;border-radius:50%;
+ width:44px;height:44px;font-size:20px;font-weight:bold;flex-shrink:0
+}
+.readonly{text-align:center;background:var(--header);padding:14px 8px;color:var(--muted);font-size:13px}
+
+.bottom-nav{
+ display:flex;background:var(--header);border-top:1px solid var(--border);
+ padding-bottom:env(safe-area-inset-bottom)
+}
+.nav-item{flex:1;padding:11px 3px;border:0;background:none;color:var(--muted);font-size:11px}
+.nav-item span{display:block;font-size:21px;margin-bottom:5px}
+.nav-item.active{color:var(--accent)}
+
+.profile-card{
+ margin:15px;padding:22px;background:var(--panel);
+ border:1px solid var(--border);border-radius:15px
+}
+.profile-avatar{
+ width:85px;height:85px;margin:0 auto 12px;border-radius:50%;
+ background:var(--header);display:grid;place-items:center;font-size:34px;
+ overflow:hidden;border:1px solid var(--border)
+}
+.profile-center{text-align:center}
+.profile-bio{color:var(--muted);margin-top:12px;white-space:pre-wrap;overflow-wrap:anywhere}
+#toast{
+ position:fixed;z-index:2000;bottom:85px;left:50%;transform:translateX(-50%);
+ background:#f1f3f9;color:#11131b;padding:12px 18px;border-radius:10px;
+ font-size:13px;max-width:90%;display:none
+}
+@media(min-width:650px){
+ #app{border-left:1px solid var(--border);border-right:1px solid var(--border)}
+}
+</style>
+</head>
+<body>
+
+<div id="splash">
+ <div class="logo">M</div>
+ <div class="brand">M-EI HO</div>
+ <div class="version">MESSENGER v2.26.41.4</div>
+</div>
+
+<!-- INSCRIPTION SIMPLE : NOM, MOT DE PASSE, BIO -->
+<section id="auth" class="hidden">
+ <div class="auth-card">
+  <div class="auth-logo">
+   <div class="logo">M</div>
+   <h1>M-EI HO Messenger</h1>
+   <div class="subtitle">Une nouvelle façon de rester connecté.</div>
+  </div>
+
+  <div id="registerFields">
+   <input id="registerUsername" class="field" placeholder="Nom d'utilisateur" autocomplete="username" maxlength="24">
+   <textarea id="registerBio" class="field" placeholder="Ta bio (facultatif)" maxlength="160" rows="2"></textarea>
+  </div>
+
+  <input id="loginUsername" class="field hidden" placeholder="Nom d'utilisateur" autocomplete="username" maxlength="24">
+  <input id="password" class="field" type="password" placeholder="Mot de passe (8 caractères minimum)" autocomplete="current-password" minlength="8">
+
+  <button id="authButton" class="primary">Créer mon compte</button>
+  <div class="auth-switch">
+   <span id="switchText">Tu as déjà un compte ?</span>
+   <button id="switchMode">Se connecter</button>
+  </div>
+  <div id="authStatus" role="status"></div>
+  <button id="closeAuth" class="close-auth">Retour à l'accueil</button>
+ </div>
+</section>
+
+<section id="app">
+ <header class="topbar">
+  <div class="top-brand">M-EI HO <span>Messenger</span></div>
+  <div class="top-actions">
+   <button class="icon-btn" id="searchShortcut" aria-label="Rechercher">⌕</button>
+   <button class="icon-btn" id="profileShortcut" aria-label="Mon profil">●</button>
+   <button class="login-shortcut" id="loginShortcut">Connexion</button>
+  </div>
+ </header>
+
+ <div class="tabs">
+  <button class="tab active" data-tab="chats">DISCUSSIONS</button>
+  <button class="tab" data-tab="actus">ACTUS</button>
+  <button class="tab" data-tab="communautes">COMMUNAUTÉS</button>
+ </div>
+
+ <main id="main">
+  <section id="chatsScreen" class="screen">
+   <div class="section-head">
+    <h2>Discussions</h2>
+    <button class="secondary" id="newChat">＋ Nouveau</button>
+   </div>
+   <input id="userSearch" class="search" placeholder="Rechercher un @meiho...">
+   <div id="userList"></div>
+  </section>
+
+  <section id="actusScreen" class="screen hidden">
+   <div class="section-head">
+    <h2>Actus</h2>
+    <button class="secondary" id="createChannel">＋ Créer</button>
+   </div>
+
+   <div class="user-row" id="officialChannel">
+    <div class="avatar">M</div>
+    <div class="user-info">
+     <div class="user-name">M-EI HO Official <span class="verified" aria-label="Certification officielle"><svg viewBox="0 0 15 15" aria-hidden="true"><circle cx="7.5" cy="7.5" r="7.5" fill="#22c55e"/><path d="m3.7 7.6 2.4 2.3 5.1-5" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+     <div class="user-preview">Chaîne officielle en lecture seule</div>
+    </div>
+    <span>›</span>
+   </div>
+
+   <div class="guide">
+    <div class="guide-icon">◉</div>
+    <h3>Découvre les Actus</h3>
+    <p>Les Actus te permettent de suivre des chaînes et de découvrir les publications. Connecte-toi pour créer ta propre chaîne.</p>
+   </div>
+   <div id="channelList"></div>
+   <div class="section-head">
+    <h2>Statuts récents</h2>
+    <button class="secondary" id="createStatus">＋ Statut</button>
+   </div>
+   <div id="statusList"><div class="empty">Les nouveaux statuts apparaîtront ici.</div></div>
+  </section>
+
+  <section id="communautesScreen" class="screen hidden">
+   <div class="section-head">
+    <h2>Communautés</h2>
+    <button class="secondary" id="createCommunity">＋ Créer</button>
+   </div>
+   <div class="guide">
+    <div class="guide-icon">♧</div>
+    <h3>Rassemble ta communauté</h3>
+    <p>Retrouve des personnes qui partagent tes intérêts. Connecte-toi pour créer ou rejoindre un groupe.</p>
+   </div>
+   <div id="communityList"><div class="empty">Les communautés disponibles apparaîtront ici.</div></div>
+  </section>
+
+  <section id="chat" class="hidden">
+   <header class="chat-head">
+    <button class="icon-btn" id="backChat" aria-label="Retour">‹</button>
+    <div class="avatar" id="chatAvatar">M</div>
+    <div class="chat-title">
+     <strong id="chatName">Discussion</strong>
+     <small id="chatSubtitle">@meiho</small>
+    </div>
+    <button class="icon-btn" id="refreshChat" aria-label="Actualiser">↻</button>
+   </header>
+   <div id="messages"><div class="empty">Ouvre une discussion pour voir les messages.</div></div>
+   <div id="composer">
+    <textarea id="messageInput" rows="1" maxlength="5000" placeholder="Écris un message..."></textarea>
+    <button class="send-btn" id="sendMessage" aria-label="Envoyer">➤</button>
+   </div>
+  </section>
+
+  <section id="profileScreen" class="screen hidden">
+   <div class="section-head">
+    <button class="secondary" id="backProfile">‹ Retour</button>
+    <h2>Mon profil</h2><span></span>
+   </div>
+   <div class="profile-card">
+    <div class="profile-center">
+     <div class="profile-avatar" id="profileAvatar">M</div>
+     <h2 id="profileName">M-EI HO</h2>
+     <div id="profileUsername" class="subtitle">@meiho</div>
+     <div id="profileBadge"></div>
+     <div id="profileBio" class="profile-bio">Connecte-toi pour personnaliser ton profil.</div>
+    </div>
+
+    <div id="profileEditor" class="hidden">
+     <input id="editDisplayName" class="field" placeholder="Nom affiché" maxlength="60">
+     <input id="editAvatar" class="field" placeholder="URL HTTPS de ta photo">
+     <textarea id="editBio" class="field" placeholder="Ta bio" maxlength="160"></textarea>
+     <button id="saveProfile" class="primary">Enregistrer mon profil</button>
+    </div>
+    <button id="profileLogin" class="primary">Se connecter / Créer un compte</button>
+    <button id="logout" class="secondary hidden" style="width:100%;margin-top:15px">Se déconnecter</button>
+   </div>
+  </section>
+ </main>
+
+ <nav class="bottom-nav">
+  <button class="nav-item active" data-tab="chats"><span>☏</span>Messages</button>
+  <button class="nav-item" data-tab="actus"><span>◉</span>Actus</button>
+  <button class="nav-item" data-tab="communautes"><span>♧</span>Communautés</button>
+  <button class="nav-item" id="bottomProfile"><span>●</span>Profil</button>
+ </nav>
+</section>
+<div id="toast" role="status"></div>
+
+<script>
+'use strict';
+
+/* CONFIGURATION SUPABASE */
+const SUPABASE_URL='https://ntkeeknfhquufvdytcqe.supabase.co';
+const SUPABASE_KEY='sb_publishable_55OLRNXlwbI7oax72BqAgw_014A4qBN';
+const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+
+const $=id=>document.getElementById(id);
+let currentUser=null,currentProfile=null,selectedUser=null;
+let selectedConversation=null,isRegisterMode=true,isOfficialChat=false;
+let messageSubscription=null,profileSubscription=null;
+let messageCache=[],userCache=[],conversationCache=[];
+let toastTimer=null,loadingMessages=false,sendingMessage=false;
+
+const VERIFIED_BADGE='<span class="verified" aria-label="Compte certifié"><svg viewBox="0 0 15 15" aria-hidden="true"><circle cx="7.5" cy="7.5" r="7.5" fill="#22c55e"/><path d="m3.7 7.6 2.4 2.3 5.1-5" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>';
+
+function toast(message){
+ const box=$('toast');box.textContent=message;box.style.display='block';
+ clearTimeout(toastTimer);toastTimer=setTimeout(()=>box.style.display='none',3200);
+}
+function escapeHTML(value){
+ return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function safeImage(url){
+ if(!url)return '';
+ try{const u=new URL(url);return u.protocol==='https:'?u.href:''}catch{return ''}
+}
+function usernameValue(value){return String(value||'').trim().replace(/^@+/,'').toLowerCase()}
+function validUsername(value){return /^[a-z0-9_]{3,24}$/.test(value)}
+function formatTime(value){
+ if(!value)return '';const date=new Date(value);if(Number.isNaN(date.getTime()))return '';
+ return date.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+}
+function formatDate(value){
+ if(!value)return '';const date=new Date(value);if(Number.isNaN(date.getTime()))return '';
+ return date.toLocaleString('fr-FR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+}
+function displayAvatar(profile){
+ const url=safeImage(profile?.avatar_url);
+ if(url)return '<img src="'+escapeHTML(url)+'" alt="" loading="lazy">';
+ const name=profile?.display_name||profile?.username||'M';
+ return escapeHTML(name.charAt(0).toUpperCase());
+}
+function authMessage(message,error=true){
+ $('authStatus').textContent=message;
+ $('authStatus').style.color=error?'#ffb4ab':'var(--accent)';
+}
+function requireLogin(){
+ if(currentUser)return true;
+ openAuth(true);toast('Crée un compte ou connecte-toi pour continuer.');return false;
+}
+
+/* AUTHENTIFICATION
+   Supabase Auth exige un email. Le nom choisi sert d'identifiant
+   et est converti en adresse technique interne. L'utilisateur
+   n'a pas besoin de saisir son adresse email.
+*/
+function internalAuthEmail(username){return username+'@users.meiho.app'}
+
+function setAuthMode(register){
+ isRegisterMode=register;
+ $('registerFields').classList.toggle('hidden',!register);
+ $('loginUsername').classList.toggle('hidden',register);
+ $('authButton').textContent=register?'Créer mon compte':'Se connecter';
+ $('switchText').textContent=register?'Tu as déjà un compte ?':'Pas encore de compte ?';
+ $('switchMode').textContent=register?'Se connecter':'Créer un compte';
+ $('password').value='';
+ authMessage('',false);
+}
+function openAuth(register=true){setAuthMode(register);$('auth').classList.remove('hidden')}
+function closeAuth(){$('auth').classList.add('hidden')}
+
+$('switchMode').addEventListener('click',()=>setAuthMode(!isRegisterMode));
+$('password').addEventListener('keydown',e=>{if(e.key==='Enter')authenticate()});
+$('authButton').addEventListener('click',authenticate);
+$('closeAuth').addEventListener('click',closeAuth);
+$('loginShortcut').addEventListener('click',()=>openAuth(true));
+$('profileLogin').addEventListener('click',()=>openAuth(true));
+
+async function authenticate(){
+ const button=$('authButton');if(button.disabled)return;
+ button.disabled=true;authMessage(isRegisterMode?'Création du compte...':'Connexion...',false);
+ try{
+  const username=usernameValue(isRegisterMode?$('registerUsername').value:$('loginUsername').value);
+  const password=$('password').value;
+  if(!validUsername(username))throw new Error('Le nom doit contenir 3 à 24 caractères : lettres, chiffres ou _.');
+  if(password.length<8)throw new Error('Le mot de passe doit contenir au moins 8 caractères.');
+  const email=internalAuthEmail(username);
+
+  if(isRegisterMode){
+   const bio=$('registerBio').value.trim().slice(0,160);
+   const result=await db.auth.signUp({email,password,options:{data:{username,display_name:username,bio}}});
+   if(result.error)throw result.error;
+   if(!result.data.session){
+    authMessage('Compte créé. La confirmation Supabase est peut-être activée. Désactive-la pour les tests ou configure la confirmation des comptes.');
+    return;
+   }
+   currentUser=result.data.user;
+   await ensureProfile(username,bio);
+   await startApplication();
+   toast('Bienvenue sur M-EI HO !');
+  }else{
+   const result=await db.auth.signInWithPassword({email,password});
+   if(result.error)throw result.error;
+   currentUser=result.data.user;
+   await loadCurrentProfile();
+   await startApplication();
+   toast('Connexion réussie.');
+  }
+ }catch(error){
+  console.error('Authentification:',error);
+  authMessage(error.message||'Une erreur est survenue.');
+ }finally{button.disabled=false}
+}
+
+async function ensureProfile(username,bio=''){
+ if(!currentUser)throw new Error('Utilisateur non connecté.');
+ const payload={id:currentUser.id,username,display_name:username,bio:bio||''};
+ const result=await db.from('profiles').upsert(payload,{onConflict:'id'}).select().single();
+ if(result.error){
+  console.error(result.error);
+  throw new Error('Compte créé, mais le profil n’a pas été enregistré. Vérifie la table profiles et ses politiques RLS.');
+ }
+ currentProfile=result.data;
+}
+async function loadCurrentProfile(){
+ const result=await db.from('profiles').select('*').eq('id',currentUser.id).maybeSingle();
+ if(result.error)throw result.error;
+ if(!result.data){
+  const meta=currentUser.user_metadata||{},username=usernameValue(meta.username);
+  if(!validUsername(username))throw new Error('Profil introuvable.');
+  await ensureProfile(username,meta.bio||'');
+ }else currentProfile=result.data;
+}
+
+/* DÉMARRAGE */
+function hideSplash(){
+ $('splash').style.opacity='0';
+ setTimeout(()=>$('splash').style.display='none',450);
+}
+async function startApplication(){
+ closeAuth();$('app').classList.remove('hidden');
+ renderProfile();updateAccountControls();
+ await Promise.allSettled([loadUsers(),loadMyConversations(),loadChannels(),loadStatuses()]);
+ openTab('chats');subscribeProfileChanges();hideSplash();
+}
+function updateAccountControls(){
+ const loggedIn=!!currentUser;
+ $('loginShortcut').classList.toggle('hidden',loggedIn);
+ $('profileLogin').classList.toggle('hidden',loggedIn);
+ $('profileEditor').classList.toggle('hidden',!loggedIn);
+ $('logout').classList.toggle('hidden',!loggedIn);
+}
+function renderProfile(){
+ if(!currentProfile){
+  $('profileName').textContent='M-EI HO';
+  $('profileUsername').textContent='@meiho';
+  $('profileAvatar').textContent='M';
+  $('profileBio').textContent='Connecte-toi pour personnaliser ton profil.';
+  $('profileBadge').innerHTML='';
+  updateAccountControls();return;
+ }
+ $('profileName').textContent=currentProfile.display_name||currentProfile.username||'M-EI HO';
+ $('profileUsername').textContent='@'+(currentProfile.username||'');
+ $('profileBio').textContent=currentProfile.bio||'Aucune bio.';
+ $('profileAvatar').innerHTML=displayAvatar(currentProfile);
+ $('profileBadge').innerHTML=currentProfile.is_verified?VERIFIED_BADGE:'';
+ $('editDisplayName').value=currentProfile.display_name||'';
+ $('editAvatar').value=currentProfile.avatar_url||'';
+ $('editBio').value=currentProfile.bio||'';
+ updateAccountControls();
+}
+
+/* NAVIGATION */
+function closeChat(){
+ unsubscribeMessages();selectedConversation=null;selectedUser=null;isOfficialChat=false;
+ $('chat').classList.add('hidden');$('composer').classList.remove('hidden');
+ const notice=$('officialNotice');if(notice)notice.remove();
+}
+function openTab(name){
+ closeChat();$('profileScreen').classList.add('hidden');
+ ['chatsScreen','actusScreen','communautesScreen'].forEach(id=>$(id).classList.add('hidden'));
+ const map={chats:'chatsScreen',actus:'actusScreen',communautes:'communautesScreen'};
+ $(map[name]).classList.remove('hidden');
+ document.querySelectorAll('[data-tab]').forEach(button=>button.classList.toggle('active',button.dataset.tab===name));
+ if(name==='chats'){if(currentUser)loadMyConversations();else showGuestHome()}
+ if(name==='actus'){loadChannels();loadStatuses()}
+ if(name==='communautes'){if(currentUser)loadCommunities();else showGuestCommunities()}
+}
+function openProfile(){
+ closeChat();['chatsScreen','actusScreen','communautesScreen'].forEach(id=>$(id).classList.add('hidden'));
+ $('profileScreen').classList.remove('hidden');
+ document.querySelectorAll('[data-tab]').forEach(b=>b.classList.remove('active'));
+ renderProfile();
+}
+document.querySelectorAll('[data-tab]').forEach(button=>button.addEventListener('click',()=>openTab(button.dataset.tab)));
+$('profileShortcut').addEventListener('click',openProfile);
+$('bottomProfile').addEventListener('click',openProfile);
+$('backProfile').addEventListener('click',()=>openTab('chats'));
+$('searchShortcut').addEventListener('click',()=>{openTab('chats');$('userSearch').focus()});
+$('newChat').addEventListener('click',()=>{if(!requireLogin())return;openTab('chats');$('userSearch').focus();toast('Recherche un identifiant @meiho.')});
+
+function showGuestHome(){
+ $('userList').innerHTML=`
+ <div class="guide"><div class="guide-icon">✉</div><h3>Bienvenue sur M-EI HO</h3>
+ <p>Découvre l'application. Connecte-toi pour rechercher des utilisateurs et démarrer des discussions.</p></div>`;
+}
+function showGuestCommunities(){
+ $('communityList').innerHTML=`
+ <div class="guide"><div class="guide-icon">♧</div><h3>Les communautés M-EI HO</h3>
+ <p>Retrouve des personnes qui partagent tes centres d'intérêt. Connecte-toi pour rejoindre ou créer un groupe.</p></div>`;
+}
+
+/* PROFIL */
+$('saveProfile').addEventListener('click',saveProfile);
+async function saveProfile(){
+ if(!requireLogin()||!currentProfile)return;
+ const displayName=$('editDisplayName').value.trim();
+ const bio=$('editBio').value.trim().slice(0,160);
+ const avatarInput=$('editAvatar').value.trim(),avatarUrl=safeImage(avatarInput);
+ if(avatarInput&&!avatarUrl){toast('La photo doit utiliser une URL HTTPS valide.');return}
+ try{
+  const result=await db.from('profiles').update({
+   display_name:displayName||currentProfile.username,bio,avatar_url:avatarUrl||null
+  }).eq('id',currentUser.id).select().single();
+  if(result.error)throw result.error;
+  currentProfile=result.data;renderProfile();toast('Profil enregistré.');
+ }catch(error){console.error(error);toast('Impossible d’enregistrer le profil. Vérifie les règles RLS.')}
+}
+
+/* UTILISATEURS */
+$('userSearch').addEventListener('input',()=>{
+ if(!currentUser){showGuestHome();return}
+ renderUsers($('userSearch').value);
+});
+async function loadUsers(){
+ if(!currentUser){showGuestHome();return}
+ const result=await db.from('profiles')
+  .select('id,username,display_name,avatar_url,bio,is_verified,created_at')
+  .order('created_at',{ascending:false}).limit(200);
+ if(result.error){console.error('Profils:',result.error);return}
+ userCache=(result.data||[]).filter(user=>user.id!==currentUser.id);
+ renderUsers($('userSearch').value);
+}
+function renderUsers(query=''){
+ const search=String(query||'').trim().replace(/^@/,'').toLowerCase();
+ const filtered=userCache.filter(user=>!search||
+  String(user.username||'').toLowerCase().includes(search)||
+  String(user.display_name||'').toLowerCase().includes(search));
+ if(!filtered.length){
+  $('userList').innerHTML='<div class="empty">'+(search?'Aucun utilisateur trouvé.':'Aucun autre utilisateur pour le moment.')+'</div>';return;
+ }
+ $('userList').innerHTML=filtered.map(user=>`
+  <div class="user-row" data-user="${escapeHTML(user.id)}">
+   <div class="avatar">${displayAvatar(user)}</div><div class="user-info">
+   <div class="user-name">${escapeHTML(user.display_name||user.username)}${user.is_verified?VERIFIED_BADGE:''}</div>
+   <div class="user-preview">@${escapeHTML(user.username||'')}</div></div><span>›</span>
+  </div>`).join('');
+ $('userList').querySelectorAll('[data-user]').forEach(row=>row.addEventListener('click',()=>{
+  const user=userCache.find(u=>u.id===row.dataset.user);if(user)startPrivateChat(user);
+ }));
+}
+
+/* CONVERSATIONS */
+async function getOrCreateConversation(otherUserId){
+ if(!currentUser||!otherUserId)throw new Error('Utilisateur introuvable.');
+ const mine=await db.from('conversation_members').select('conversation_id').eq('user_id',currentUser.id);
+ if(mine.error)throw mine.error;
+ const myIds=(mine.data||[]).map(item=>item.conversation_id);
+ if(myIds.length){
+  const theirs=await db.from('conversation_members').select('conversation_id')
+   .eq('user_id',otherUserId).in('conversation_id',myIds);
+  if(theirs.error)throw theirs.error;
+  for(const id of (theirs.data||[]).map(item=>item.conversation_id)){
+   const result=await db.from('conversations').select('id,is_group').eq('id',id).maybeSingle();
+   if(!result.error&&result.data&&!result.data.is_group)return result.data;
+  }
+ }
+ const created=await db.from('conversations')
+  .insert({name:null,is_group:false,created_by:currentUser.id}).select().single();
+ if(created.error)throw created.error;
+ const conversation=created.data;
+ const members=await db.from('conversation_members').insert([
+  {conversation_id:conversation.id,user_id:currentUser.id},
+  {conversation_id:conversation.id,user_id:otherUserId}
+ ]);
+ if(members.error)throw new Error('Impossible d’ajouter les membres. Vérifie les politiques RLS.');
+ return conversation;
+}
+async function startPrivateChat(user){
+ if(!requireLogin())return;
+ try{
+  selectedUser=user;isOfficialChat=false;
+  selectedConversation=await getOrCreateConversation(user.id);
+  showChatHeader(user.display_name||user.username,'@'+user.username,user);
+  $('composer').classList.remove('hidden');$('messageInput').placeholder='Écris un message...';
+  $('chat').classList.remove('hidden');await loadMessages();subscribeMessages();
+ }catch(error){console.error(error);toast(error.message||'Impossible d’ouvrir la discussion.')}
+}
+async function loadMyConversations(){
+ if(!currentUser)return;
+ try{
+  const members=await db.from('conversation_members').select('conversation_id,joined_at')
+   .eq('user_id',currentUser.id).order('joined_at',{ascending:false}).limit(100);
+  if(members.error)throw members.error;
+  const ids=(members.data||[]).map(m=>m.conversation_id);
+  if(!ids.length){conversationCache=[];if(!$('chatsScreen').classList.contains('hidden'))renderConversationList();return}
+  const convResult=await db.from('conversations').select('id,name,is_group,created_by,created_at')
+   .in('id',ids).order('created_at',{ascending:false});
+  if(convResult.error)throw convResult.error;
+  const memberResult=await db.from('conversation_members').select('conversation_id,user_id').in('conversation_id',ids);
+  if(memberResult.error)throw memberResult.error;
+  const otherIds=[...new Set((memberResult.data||[]).filter(m=>m.user_id!==currentUser.id).map(m=>m.user_id))];
+  let profiles=[];
+  if(otherIds.length){
+   const result=await db.from('profiles').select('id,username,display_name,avatar_url,is_verified').in('id',otherIds);
+   if(!result.error)profiles=result.data||[];
+  }
+  conversationCache=(convResult.data||[]).map(conversation=>{
+   const memberIds=(memberResult.data||[]).filter(m=>m.conversation_id===conversation.id).map(m=>m.user_id);
+   const other=profiles.find(profile=>memberIds.includes(profile.id));
+   return {...conversation,otherUser:other||null};
+  });
+  renderConversationList();
+ }catch(error){console.error('Conversations:',error);toast('Les conversations ne peuvent pas être chargées. Vérifie les tables et les règles RLS.')}
+}
+function renderConversationList(){
+ if(!currentUser)return;
+ const search=String($('userSearch').value||'').trim().replace(/^@/,'').toLowerCase();
+ const filtered=conversationCache.filter(c=>{
+  const title=c.is_group?c.name:(c.otherUser?.display_name||c.otherUser?.username||'Discussion');
+  return !search||String(title||'').toLowerCase().includes(search)||String(c.otherUser?.username||'').toLowerCase().includes(search);
+ });
+ if(!filtered.length){renderUsers($('userSearch').value);return}
+ $('userList').innerHTML=filtered.map(c=>{
+  const title=c.is_group?(c.name||'Groupe'):(c.otherUser?.display_name||c.otherUser?.username||'Discussion');
+  const avatar=c.otherUser&&!c.is_group?displayAvatar(c.otherUser):escapeHTML((title||'M').charAt(0).toUpperCase());
+  const subtitle=c.is_group?'Groupe':'@'+(c.otherUser?.username||'utilisateur');
+  return `<div class="user-row" data-conversation="${escapeHTML(c.id)}"><div class="avatar">${avatar}</div>
+   <div class="user-info"><div class="user-name">${escapeHTML(title)}${c.otherUser?.is_verified?VERIFIED_BADGE:''}</div>
+   <div class="user-preview">${escapeHTML(subtitle)}</div></div><span>›</span></div>`;
+ }).join('');
+ $('userList').querySelectorAll('[data-conversation]').forEach(row=>row.addEventListener('click',()=>{
+  const c=conversationCache.find(x=>x.id===row.dataset.conversation);if(c)openExistingConversation(c);
+ }));
+}
+async function openExistingConversation(conversation){
+ if(!requireLogin())return;
+ try{
+  selectedConversation=conversation;isOfficialChat=false;selectedUser=conversation.otherUser||null;
+  showChatHeader(conversation.is_group?(conversation.name||'Groupe'):(selectedUser?.display_name||selectedUser?.username||'Discussion'),
+   conversation.is_group?'Groupe M-EI HO':'@'+(selectedUser?.username||'utilisateur'),selectedUser);
+  $('composer').classList.remove('hidden');$('chat').classList.remove('hidden');
+  await loadMessages();subscribeMessages();
+ }catch(error){console.error(error);toast('Impossible d’ouvrir cette conversation.')}
+}
+function showChatHeader(name,subtitle,profile){
+ $('chatName').textContent=name;$('chatSubtitle').textContent=subtitle;
+ $('chatAvatar').innerHTML=profile?displayAvatar(profile):escapeHTML((name||'M').charAt(0).toUpperCase());
+}
+
+/* MESSAGES */
+async function loadMessages(){
+ if(!selectedConversation||loadingMessages)return;
+ loadingMessages=true;$('messages').innerHTML='<div class="empty">Chargement des messages...</div>';
+ try{
+  const result=await db.from('messages').select('id,conversation_id,sender_id,content,created_at')
+   .eq('conversation_id',selectedConversation.id).order('created_at',{ascending:true}).limit(300);
+  if(result.error)throw result.error;
+  messageCache=result.data||[];renderMessages();
+ }catch(error){console.error('Messages:',error);$('messages').innerHTML='<div class="empty">Impossible de charger les messages. Vérifie les permissions RLS.</div>'}
+ finally{loadingMessages=false}
+}
+function renderMessages(){
+ const host=$('messages');
+ if(!messageCache.length){host.innerHTML='<div class="empty">Aucun message. Envoie le premier !</div>';return}
+ host.innerHTML=messageCache.map(message=>`
+  <div class="message ${message.sender_id===currentUser?.id?'mine':''}">
+   ${escapeHTML(message.content)}
+   <div class="message-time">${escapeHTML(formatTime(message.created_at))}${message.sender_id===currentUser?.id?' · Vous':''}</div>
+  </div>`).join('');
+ host.scrollTop=host.scrollHeight;
+}
+$('sendMessage').addEventListener('click',sendMessage);
+$('messageInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage()}});
+$('messageInput').addEventListener('input',()=>{
+ const input=$('messageInput');input.style.height='auto';input.style.height=Math.min(input.scrollHeight,120)+'px';
+});
+async function sendMessage(){
+ if(!requireLogin())return;
+ if(sendingMessage||!selectedConversation||isOfficialChat)return;
+ const input=$('messageInput'),content=input.value.trim();if(!content)return;
+ sendingMessage=true;$('sendMessage').disabled=true;
+ try{
+  const result=await db.from('messages').insert({
+   conversation_id:selectedConversation.id,sender_id:currentUser.id,content
+  }).select().single();
+  if(result.error)throw result.error;
+  input.value='';input.style.height='auto';
+  if(!messageCache.some(m=>m.id===result.data.id)){messageCache.push(result.data);renderMessages()}
+ }catch(error){console.error('Envoi:',error);toast('Message non envoyé. Vérifie les membres et les règles RLS.')}
+ finally{sendingMessage=false;$('sendMessage').disabled=false;input.focus()}
+}
+function subscribeMessages(){
+ unsubscribeMessages();if(!selectedConversation)return;
+ messageSubscription=db.channel('messages-'+selectedConversation.id+'-'+Date.now())
+  .on('postgres_changes',{event:'INSERT',schema:'public',table:'messages',filter:'conversation_id=eq.'+selectedConversation.id},payload=>{
+   if(!messageCache.some(m=>m.id===payload.new.id)){
+    messageCache.push(payload.new);messageCache.sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));renderMessages();
+   }
+  }).subscribe();
+}
+function unsubscribeMessages(){if(messageSubscription){db.removeChannel(messageSubscription);messageSubscription=null}}
+function defaultBackChat(){closeChat();if(currentUser)loadMyConversations();openTab('chats')}
+$('backChat').addEventListener('click',defaultBackChat);
+$('refreshChat').addEventListener('click',async()=>{if(selectedConversation){await loadMessages();toast('Discussion actualisée.')}});
+
+/* ACTUS / CHAÎNES */
+async function loadChannels(){
+ const host=$('channelList');
+ const result=await db.from('channels').select('id,name,description,avatar_url,owner_id,is_verified,created_at')
+  .order('created_at',{ascending:false}).limit(100);
+ if(result.error){console.error('Chaînes:',result.error);host.innerHTML='<div class="empty">Les chaînes ne sont pas disponibles pour le moment.</div>';return}
+ const channels=result.data||[];
+ if(!channels.length){host.innerHTML='<div class="empty">Aucune chaîne publique pour le moment.</div>';return}
+ host.innerHTML=channels.map(c=>{
+  const photo=safeImage(c.avatar_url);
+  return `<div class="user-row" data-channel="${escapeHTML(c.id)}"><div class="avatar">${photo?'<img src="'+escapeHTML(photo)+'" alt="">':escapeHTML((c.name||'M').charAt(0).toUpperCase())}</div>
+   <div class="user-info"><div class="user-name">${escapeHTML(c.name)}${c.is_verified?VERIFIED_BADGE:''}</div>
+   <div class="user-preview">${escapeHTML(c.description||'Chaîne M-EI HO')}</div></div><span>›</span></div>`;
+ }).join('');
+ host.querySelectorAll('[data-channel]').forEach(row=>row.addEventListener('click',()=>openChannel(row.dataset.channel)));
+}
+async function openChannel(channelId){
+ const result=await db.from('channels').select('*').eq('id',channelId).single();
+ if(result.error){toast('Impossible de charger cette chaîne.');return}
+ const channel=result.data;
+ const posts=await db.from('channel_posts').select('id,channel_id,content,media_url,created_at')
+  .eq('channel_id',channelId).order('created_at',{ascending:false}).limit(100);
+ if(posts.error){toast('Impossible de charger les publications.');return}
+ const host=$('channelList');
+ host.innerHTML=`<div class="section-head"><button class="secondary" id="backChannels">‹ Chaînes</button><h2>${escapeHTML(channel.name)}${channel.is_verified?VERIFIED_BADGE:''}</h2></div>
+  <div class="notice">${escapeHTML(channel.description||'Chaîne M-EI HO')}</div>
+  ${posts.data?.length?posts.data.map(p=>{
+   const media=safeImage(p.media_url);
+   return `<article class="card"><p>${escapeHTML(p.content||'')}</p>${media?'<p><a href="'+escapeHTML(media)+'" target="_blank" rel="noopener">Ouvrir le média</a></p>':''}<small class="subtitle">${escapeHTML(formatDate(p.created_at))}</small></article>`;
+  }).join(''):'<div class="empty">Aucune publication pour le moment.</div>'}`;
+ $('backChannels').addEventListener('click',loadChannels);
+}
+$('createChannel').addEventListener('click',async()=>{
+ if(!requireLogin())return;
+ const name=prompt('Nom de la chaîne :');if(!name||!name.trim())return;
+ const description=prompt('Description (facultatif) :')||'';
+ try{
+  const result=await db.from('channels').insert({
+   name:name.trim().slice(0,80),description:description.trim().slice(0,500),
+   owner_id:currentUser.id,is_verified:false
+  }).select().single();
+  if(result.error)throw result.error;
+  await loadChannels();toast('Chaîne créée.');
+ }catch(error){console.error(error);toast('Création impossible. Vérifie les règles RLS de channels.')}
+});
+
+/* STATUTS — nécessite une table statuses compatible */
+async function loadStatuses(){
+ const host=$('statusList');
+ const result=await db.from('statuses').select('id,user_id,media_url,caption,expires_at,created_at')
+  .gt('expires_at',new Date().toISOString()).order('created_at',{ascending:false}).limit(100);
+ if(result.error){console.error('Statuts:',result.error);host.innerHTML='<div class="empty">Les statuts ne sont pas disponibles pour le moment.</div>';return}
+ const statuses=result.data||[];
+ if(!statuses.length){host.innerHTML='<div class="empty">Aucun statut récent.</div>';return}
+ const ids=[...new Set(statuses.map(s=>s.user_id))];
+ const users=await db.from('profiles').select('id,username,display_name').in('id',ids);
+ const byId=new Map((users.data||[]).map(u=>[u.id,u]));
+ host.innerHTML=statuses.map(s=>{
+  const user=byId.get(s.user_id),media=safeImage(s.media_url);
+  return `<article class="card"><strong>${escapeHTML(user?.display_name||user?.username||'Utilisateur')}</strong>
+   <p>${escapeHTML(s.caption||'')}</p>${media?'<p><a href="'+escapeHTML(media)+'" target="_blank" rel="noopener">Afficher le média</a></p>':''}
+   <small class="subtitle">${escapeHTML(formatDate(s.created_at))}</small></article>`;
+ }).join('');
+}
+$('createStatus').addEventListener('click',async()=>{
+ if(!requireLogin())return;
+ const media=prompt('URL HTTPS de la photo ou vidéo :');if(!media)return;
+ if(!safeImage(media)){toast('Entre une URL HTTPS valide.');return}
+ const caption=prompt('Légende (facultatif) :')||'';
+ const expires=new Date(Date.now()+24*60*60*1000).toISOString();
+ try{
+  const result=await db.from('statuses').insert({
+   user_id:currentUser.id,media_url:safeImage(media),caption:caption.slice(0,500),expires_at:expires
+  });
+  if(result.error)throw result.error;
+  await loadStatuses();toast('Statut publié.');
+ }catch(error){console.error(error);toast('Publication impossible. Vérifie la table statuses et ses règles RLS.')}
+});
+
+/* COMMUNAUTÉS / GROUPES */
+async function loadCommunities(){
+ if(!currentUser){showGuestCommunities();return}
+ const host=$('communityList');
+ const result=await db.from('conversations').select('id,name,is_group,created_by,created_at')
+  .eq('is_group',true).order('created_at',{ascending:false}).limit(100);
+ if(result.error){console.error(result.error);host.innerHTML='<div class="empty">Impossible de charger les groupes.</div>';return}
+ const groups=result.data||[];
+ if(!groups.length){host.innerHTML='<div class="empty">Aucun groupe disponible.</div>';return}
+ const membership=await db.from('conversation_members').select('conversation_id').eq('user_id',currentUser.id);
+ const myIds=new Set((membership.data||[]).map(m=>m.conversation_id));
+ host.innerHTML=groups.map(g=>`
+  <div class="user-row" data-group="${escapeHTML(g.id)}"><div class="avatar">♧</div>
+  <div class="user-info"><div class="user-name">${escapeHTML(g.name||'Groupe M-EI HO')}</div>
+  <div class="user-preview">${myIds.has(g.id)?'Tu es membre':'Groupe'}</div></div><span>›</span></div>`).join('');
+ host.querySelectorAll('[data-group]').forEach(row=>row.addEventListener('click',async()=>{
+  const group=groups.find(g=>g.id===row.dataset.group);if(!group)return;
+  if(!myIds.has(group.id)){
+   if(!confirm('Veux-tu rejoindre ce groupe ?'))return;
+   const added=await db.from('conversation_members').insert({conversation_id:group.id,user_id:currentUser.id});
+   if(added.error){toast('Impossible de rejoindre ce groupe.');return}
+  }
+  await loadMyConversations();openExistingConversation(group);
+ }));
+}
+$('createCommunity').addEventListener('click',async()=>{
+ if(!requireLogin())return;
+ const name=prompt('Nom du groupe :');if(!name||!name.trim())return;
+ try{
+  const created=await db.from('conversations').insert({
+   name:name.trim().slice(0,80),is_group:true,created_by:currentUser.id
+  }).select().single();
+  if(created.error)throw created.error;
+  const member=await db.from('conversation_members').insert({conversation_id:created.data.id,user_id:currentUser.id});
+  if(member.error)throw member.error;
+  await loadCommunities();await loadMyConversations();toast('Groupe créé.');
+ }catch(error){console.error(error);toast('Création impossible. Vérifie les politiques RLS.')}
+});
+
+/* CHAÎNE OFFICIELLE EN LECTURE SEULE */
+$('officialChannel').addEventListener('click',()=>{
+ closeChat();isOfficialChat=true;selectedConversation=null;
+ showChatHeader('M-EI HO Official','Chaîne officielle',null);
+ $('messages').innerHTML=`<div class="guide"><div class="guide-icon">M</div>
+ <h3>M-EI HO Official ${VERIFIED_BADGE}</h3><p>Bienvenue sur la chaîne officielle M-EI HO.</p></div>`;
+ $('composer').classList.add('hidden');
+ const notice=document.createElement('div');notice.id='officialNotice';notice.className='readonly';
+ notice.textContent='🔒 Chaîne lecture seule - Personne ne peut envoyer';
+ $('chat').appendChild(notice);$('chat').classList.remove('hidden');
+ $('backChat').onclick=()=>{
+  notice.remove();$('chat').classList.add('hidden');$('composer').classList.remove('hidden');
+  $('backChat').onclick=defaultBackChat;openTab('actus');
+ };
+});
+
+/* TEMPS RÉEL DES PROFILS */
+function subscribeProfileChanges(){
+ if(!currentUser)return;
+ if(profileSubscription)db.removeChannel(profileSubscription);
+ profileSubscription=db.channel('meiho-profiles-'+currentUser.id)
+  .on('postgres_changes',{event:'*',schema:'public',table:'profiles'},payload=>{
+   if(payload.new?.id===currentUser.id){currentProfile=payload.new;renderProfile()}
+   loadUsers().catch(console.error);
+  }).subscribe();
+}
+
+/* DÉCONNEXION : RETOUR AU MODE DÉCOUVERTE */
+$('logout').addEventListener('click',async()=>{
+ if(!currentUser||!confirm('Veux-tu vraiment te déconnecter ?'))return;
+ unsubscribeMessages();
+ if(profileSubscription){db.removeChannel(profileSubscription);profileSubscription=null}
+ try{
+  const result=await db.auth.signOut();if(result.error)throw result.error;
+ }catch(error){console.error(error);toast('Déconnexion impossible.');return}
+ currentUser=null;currentProfile=null;selectedUser=null;selectedConversation=null;
+ userCache=[];conversationCache=[];messageCache=[];
+ $('userSearch').value='';closeAuth();renderProfile();updateAccountControls();
+ showGuestHome();showGuestCommunities();openTab('chats');toast('Tu es déconnecté.');
+});
+
+/* INITIALISATION : LES TROIS PAGES RESTENT ACCESSIBLES */
+async function initialize(){
+ try{
+  const result=await db.auth.getSession();if(result.error)throw result.error;
+  const session=result.data.session;
+  if(session?.user){
+   currentUser=session.user;
+   await loadCurrentProfile();
+   $('app').classList.remove('hidden');renderProfile();updateAccountControls();
+   await Promise.allSettled([loadUsers(),loadMyConversations(),loadChannels(),loadStatuses()]);
+   subscribeProfileChanges();
+  }else{
+   $('app').classList.remove('hidden');showGuestHome();showGuestCommunities();
+   renderProfile();updateAccountControls();
+   loadChannels();loadStatuses();
+  }
+ }catch(error){
+  console.error('Initialisation:',error);
+  $('app').classList.remove('hidden');showGuestHome();showGuestCommunities();
+  renderProfile();updateAccountControls();
+  toast('Mode découverte activé. Vérifie la configuration Supabase.');
+ }finally{hideSplash()}
+}
+initialize();
+</script>
+</body>
+  </html>
