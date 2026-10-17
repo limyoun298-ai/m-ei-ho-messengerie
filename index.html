@@ -1,0 +1,1423 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#075de9">
+<meta name="description" content="M-EI HO Messengerie : discutez, partagez et restez connectés.">
+<title>M-EI HO Messengerie</title>
+
+<style>
+:root{
+  --blue:#075de9;
+  --blue2:#1677ff;
+  --green:#25D366;
+  --bg:#f5f8ff;
+  --surface:#ffffff;
+  --surface2:#edf3ff;
+  --text:#172033;
+  --muted:#718096;
+  --border:#e1e8f4;
+  --danger:#e53935;
+  --shadow:0 5px 22px rgba(20,60,130,.08);
+}
+[data-theme="dark"]{
+  --bg:#101722;
+  --surface:#192433;
+  --surface2:#223248;
+  --text:#edf3ff;
+  --muted:#a2b0c5;
+  --border:#304057;
+  --shadow:0 5px 22px rgba(0,0,0,.15);
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--bg);color:var(--text);
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  font-size:15px;min-height:100vh;
+}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer}
+button:disabled{opacity:.5;cursor:not-allowed}
+.hidden{display:none!important}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{
+  outline:2px solid var(--blue2);outline-offset:2px
+}
+#splash{
+  position:fixed;inset:0;z-index:1000;background:#fff;
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:18px;
+  transition:opacity .35s ease;
+}
+.splash-logo{
+  width:145px;height:145px;border:2px solid #1677ff;
+  border-radius:50%;display:grid;place-items:center;
+  color:#075de9;font-size:92px;font-weight:400;line-height:1
+}
+.splash-caption{color:#9299a6;font-size:14px;letter-spacing:5px}
+#app{max-width:680px;margin:auto;min-height:100vh;background:var(--bg)}
+.topbar{
+  height:64px;background:var(--blue);color:white;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 17px;position:sticky;top:0;z-index:20;
+  box-shadow:0 2px 8px #003b9918;
+}
+.brand{font-size:20px;font-weight:750;letter-spacing:-.5px}
+.top-actions{display:flex;gap:8px}
+.icon-button{
+  border:0;background:transparent;color:inherit;
+  width:42px;height:42px;border-radius:50%;
+  display:grid;place-items:center;
+}
+.icon-button:active{background:#ffffff22}
+svg{width:24px;height:24px;fill:none;stroke:currentColor;
+stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.page{padding:17px 15px 95px;min-height:calc(100vh - 64px)}
+.page-title{font-size:23px;font-weight:750;margin:4px 0 16px}
+.muted{color:var(--muted)}
+.card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:17px;padding:16px;margin-bottom:13px;
+  box-shadow:var(--shadow);
+}
+.btn{
+  border:0;background:var(--blue);color:#fff;
+  border-radius:12px;padding:12px 17px;font-weight:650;
+  min-height:44px;
+}
+.btn.secondary{background:var(--surface2);color:var(--text)}
+.btn.outline{background:transparent;color:var(--blue);border:1px solid var(--blue)}
+.btn.danger{background:var(--danger)}
+.btn.full{width:100%}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:13px;font-weight:650;margin-bottom:7px}
+.field input,.field textarea,.field select,.search-input{
+  width:100%;border:1px solid var(--border);border-radius:11px;
+  padding:12px;background:var(--surface);color:var(--text);
+}
+.field textarea{min-height:85px;resize:vertical}
+.row{display:flex;align-items:center;gap:12px}
+.between{justify-content:space-between}
+.grow{flex:1;min-width:0}
+.avatar{
+  width:48px;height:48px;flex-shrink:0;border-radius:50%;
+  display:grid;place-items:center;overflow:hidden;
+  background:var(--surface2);color:var(--blue);font-weight:750;
+}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.avatar.large{width:94px;height:94px;font-size:28px}
+.username{font-weight:700;overflow-wrap:anywhere}
+.subtitle{font-size:13px;color:var(--muted);margin-top:4px}
+.verified{
+  display:inline-flex;width:15px;height:15px;min-width:15px;
+  border-radius:50%;background:#25D366;color:white;
+  align-items:center;justify-content:center;
+  vertical-align:middle;margin-left:4px;
+}
+.verified svg{width:10px;height:10px;stroke-width:2.7}
+.badge-label{font-size:12px;color:var(--green);font-weight:650}
+.list-item{
+  display:flex;align-items:center;gap:12px;padding:13px 2px;
+  border-bottom:1px solid var(--border);cursor:pointer;
+}
+.list-item:last-child{border-bottom:0}
+.list-item:active{opacity:.7}
+.bottom-nav{
+  position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+  width:100%;max-width:680px;z-index:30;
+  background:var(--surface);border-top:1px solid var(--border);
+  display:grid;grid-template-columns:repeat(4,1fr);
+  padding:7px 4px max(7px,env(safe-area-inset-bottom));
+}
+.nav-button{
+  border:0;background:transparent;color:var(--muted);
+  min-height:58px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:4px;font-size:11px;
+}
+.nav-button svg{width:23px;height:23px}
+.nav-button.active{color:var(--blue);font-weight:750}
+.nav-button.active svg{stroke-width:2.5}
+.pill{
+  background:var(--surface2);padding:5px 9px;
+  border-radius:20px;font-size:12px;color:var(--muted)
+}
+.notice{
+  padding:12px;border-radius:11px;background:var(--surface2);
+  color:var(--text);font-size:13px;margin:10px 0;
+}
+.toast{
+  position:fixed;z-index:2000;bottom:90px;left:50%;
+  transform:translateX(-50%);background:#172033;color:#fff;
+  padding:12px 18px;border-radius:12px;max-width:90%;
+  box-shadow:var(--shadow);font-size:14px;
+}
+.empty{text-align:center;padding:38px 15px;color:var(--muted)}
+.empty svg{width:42px;height:42px;margin-bottom:10px}
+.guide-image{
+  min-height:190px;border-radius:18px;background:var(--surface2);
+  display:grid;place-items:center;color:var(--blue);margin-bottom:20px;
+}
+.guide-image svg{width:90px;height:90px;stroke-width:1.3}
+.guide-dots{display:flex;justify-content:center;gap:8px;margin:22px}
+.guide-dot{width:8px;height:8px;border-radius:50%;background:var(--border)}
+.guide-dot.active{background:var(--blue);width:23px;border-radius:10px}
+.auth-wrap{max-width:440px;margin:0 auto}
+.auth-logo{
+  width:70px;height:70px;border:2px solid var(--blue);
+  border-radius:50%;display:grid;place-items:center;
+  color:var(--blue);font-size:44px;margin:5px auto 20px;
+}
+.chat-header{
+  background:var(--surface);border-bottom:1px solid var(--border);
+  padding:9px 12px;display:flex;align-items:center;gap:10px;
+}
+.chat-messages{
+  min-height:50vh;max-height:calc(100vh - 250px);
+  overflow:auto;padding:16px 12px;
+  background:var(--bg);
+}
+.bubble{
+  padding:10px 12px;border-radius:14px;margin:7px 0;
+  max-width:85%;overflow-wrap:anywhere;
+  background:var(--surface);border:1px solid var(--border);
+}
+.bubble.mine{margin-left:auto;background:#dceaff;color:#172033;border-color:#dceaff}
+[data-theme="dark"] .bubble.mine{background:#174a86;color:#fff;border-color:#174a86}
+.bubble-time{font-size:10px;opacity:.7;text-align:right;margin-top:5px}
+.composer{
+  display:flex;gap:8px;padding:10px;background:var(--surface);
+  border-top:1px solid var(--border);
+}
+.composer input{
+  flex:1;min-width:0;border:1px solid var(--border);
+  border-radius:22px;padding:12px;background:var(--bg);color:var(--text)
+}
+.profile-head{text-align:center;padding:15px 0 22px}
+.setting-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:15px 2px;border-bottom:1px solid var(--border);gap:12px;
+}
+.setting-row:last-child{border-bottom:0}
+.small{font-size:12px}
+@media(min-width:681px){
+  body{padding-bottom:0}
+  #app{box-shadow:0 0 35px #00265a0a}
+}
+</style>
+</head>
+
+<body>
+
+<div id="splash">
+  <div class="splash-logo">M</div>
+  <div class="splash-caption">FROM M-EI-HO</div>
+</div>
+
+<div id="app" class="hidden">
+  <header class="topbar">
+    <div class="brand">M-EI HO</div>
+    <div class="top-actions">
+      <button class="icon-button" id="searchButton" aria-label="Rechercher">
+        <svg viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg>
+      </button>
+      <button class="icon-button" id="settingsButton" aria-label="Paramètres">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="m19 13.5 2 1.5-2 3.5-2.5-1-2 1.2-.5 2.8h-4L9.5 18l-2-1.2-2.5 1L3 14.3l2-1.5v-2.5l-2-1.5L5 5.3l2.5 1 2-1.2L10 2.3h4l.5 2.8 2 1.2 2.5-1 2 3.5-2 1.5z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main id="main"></main>
+
+  <nav class="bottom-nav hidden" id="bottomNav">
+    <button class="nav-button active" data-page="chats">
+      <svg viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 9.5 9.5 0 0 1-4-.9L3 20l1.3-4.2A8.4 8.4 0 1 1 21 11.5Z"/></svg>
+      <span>Discussions</span>
+    </button>
+    <button class="nav-button" data-page="actus">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg>
+      <span>Actus</span>
+    </button>
+    <button class="nav-button" data-page="communities">
+      <svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><circle cx="17" cy="9" r="2.5"/><path d="M2 20c0-4 3-6 7-6s7 2 7 6M16 15c3 0 6 1.5 6 5"/></svg>
+      <span>Communauté</span>
+    </button>
+    <button class="nav-button" data-page="calls">
+      <svg viewBox="0 0 24 24"><path d="M7 3H4a1 1 0 0 0-1 1c0 9.4 7.6 17 17 17a1 1 0 0 0 1-1v-3l-5-2-2 3a14 14 0 0 1-7-7l3-2z"/></svg>
+      <span>Appel</span>
+    </button>
+  </nav>
+</div>
+
+<div id="toast" class="toast hidden" role="status"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+"use strict";
+
+/* CONFIGURATION */
+const SUPABASE_URL = "https://zwteqiwdnvmtofaodnhm.supabase.co";
+const SUPABASE_KEY = "sb_publishable_IDyqhFxJEuIWtOo46jwj8w_BOeQfcX3";
+const AUTH_ENDPOINT = SUPABASE_URL + "/functions/v1/meiho-auth";
+
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const state = {
+  user:null,
+  profile:null,
+  page:"chats",
+  previousPage:"chats",
+  selectedConversation:null,
+  selectedProfile:null,
+  messages:[],
+  conversations:[],
+  guide:0,
+  authMode:"signup",
+  search:"",
+  subscription:null,
+  theme:localStorage.getItem("meiho_theme") || "light",
+  language:localStorage.getItem("meiho_language") || "fr"
+};
+
+const $ = id => document.getElementById(id);
+const main = $("main");
+
+const icons = {
+  back:'<svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>',
+  user:'<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-5 3-8 8-8s8 3 8 8"/></svg>',
+  message:'<svg viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 9.5 9.5 0 0 1-4-.9L3 20l1.3-4.2A8.4 8.4 0 1 1 21 11.5Z"/></svg>',
+  camera:'<svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="15" rx="3"/><circle cx="12" cy="13" r="4"/><path d="m8 6 1-3h6l1 3"/></svg>',
+  check:'<svg viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg>',
+  group:'<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><circle cx="17" cy="9" r="2.5"/><path d="M2 20c0-4 3-6 7-6s7 2 7 6M16 15c3 0 6 1.5 6 5"/></svg>',
+  bell:'<svg viewBox="0 0 24 24"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg>',
+  shield:'<svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/><path d="m9 12 2 2 4-4"/></svg>',
+  sun:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
+  official:'<svg viewBox="0 0 24 24"><path d="M12 2 15 5l4-.2.2 4L22 12l-2.8 3.2.2 4-4-.2L12 22l-3.2-3-4 .2.2-4L2 12l3-3.2-.2-4 4 .2z"/><path d="m8 12 3 3 5-6"/></svg>'
+};
+
+function escapeHTML(value){
+  return String(value ?? "").replace(/[&<>"']/g,c=>({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  })[c]);
+}
+
+function toast(message){
+  $("toast").textContent=message;
+  $("toast").classList.remove("hidden");
+  clearTimeout(toast.timer);
+  toast.timer=setTimeout(()=>$("toast").classList.add("hidden"),3200);
+}
+
+function verifiedBadge(){
+  return '<span class="verified" title="Compte vérifié">'+icons.check+'</span>';
+}
+
+function avatarHTML(profile,size=""){
+  const name=profile?.username || profile?.name || "?";
+  const url=profile?.avatar_url || profile?.photo_url || "";
+  return '<div class="avatar '+size+'">'+
+    (url?'<img alt="" src="'+escapeHTML(url)+'">':escapeHTML(name.slice(0,1).toUpperCase()))+
+    '</div>';
+}
+
+function displayName(profile){
+  const name=profile?.username || profile?.name || "Utilisateur";
+  return escapeHTML(name)+(profile?.badge_verified ? verifiedBadge() : "");
+}
+
+function applyTheme(){
+  document.documentElement.dataset.theme=state.theme;
+  localStorage.setItem("meiho_theme",state.theme);
+}
+
+function go(page){
+  state.previousPage=state.page;
+  state.page=page;
+  render();
+  window.scrollTo(0,0);
+}
+
+function setNavActive(page){
+  document.querySelectorAll(".nav-button").forEach(button=>{
+    button.classList.toggle("active",button.dataset.page===page);
+  });
+}
+
+function headerTitle(title){
+  return '<div class="row" style="margin-bottom:15px">'+
+    '<button class="icon-button" style="color:var(--text)" onclick="go(\\''+
+    escapeHTML(state.previousPage||"chats")+'\\')">'+icons.back+'</button>'+
+    '<div class="page-title" style="margin:0">'+title+'</div></div>';
+}
+
+function showApplication(){
+  $("splash").style.opacity="0";
+  setTimeout(()=>$("splash").classList.add("hidden"),350);
+  $("app").classList.remove("hidden");
+  applyTheme();
+}
+
+function showGuide(){
+  state.page="guide";
+  state.guide=0;
+  render();
+}
+
+const guidePages=[
+  {
+    title:"Bienvenue sur M-EI HO",
+    text:"Crée ton profil et choisis ton nom d'utilisateur.",
+    icon:icons.user
+  },
+  {
+    title:"Personnalise ton espace",
+    text:"Choisis ton thème, ta langue et tes préférences.",
+    icon:icons.shield
+  },
+  {
+    title:"Reste connecté",
+    text:"Discute, découvre des chaînes et rejoins des communautés.",
+    icon:icons.message
+  }
+];
+
+function renderGuide(){
+  const g=guidePages[state.guide];
+  return '<section class="page"><div style="padding-top:25px">'+
+    '<div class="guide-image">'+g.icon+'</div>'+
+    '<h1 class="page-title">'+g.title+'</h1>'+
+    '<p class="muted">'+g.text+'</p>'+
+    '<div class="guide-dots">'+guidePages.map((_,i)=>
+      '<span class="guide-dot '+(i===state.guide?"active":"")+'"></span>'
+    ).join("")+'</div>'+
+    '<button class="btn full" onclick="nextGuide()">'+
+    (state.guide===2?"Commencer":"Suivant")+'</button>'+
+    '<button class="btn secondary full" style="margin-top:10px" onclick="skipGuide()">Passer</button>'+
+    '</div></section>';
+}
+
+function nextGuide(){
+  if(state.guide<2){state.guide++;render();return;}
+  state.authMode="signup";go("auth");
+}
+
+function skipGuide(){
+  state.authMode="signup";go("auth");
+}
+
+function renderAuth(){
+  const signup=state.authMode==="signup";
+  return '<section class="page"><div class="auth-wrap">'+
+    '<div class="auth-logo">M</div>'+
+    '<h1 class="page-title" style="text-align:center">'+
+    (signup?"Créer un compte":"Connexion")+'</h1>'+
+    '<p class="muted" style="text-align:center;margin-bottom:25px">'+
+    'Bienvenue dans M-EI HO Messengerie</p>'+
+    '<form id="authForm">'+
+    '<div class="field"><label for="username">Nom d’utilisateur</label>'+
+    '<input id="username" name="username" required minlength="3" maxlength="30" '+
+    'autocomplete="username" placeholder="@luc_marie"></div>'+
+    '<div class="field"><label for="password">Mot de passe</label>'+
+    '<input id="password" name="password" type="password" required minlength="6" '+
+    'autocomplete="'+(signup?"new-password":"current-password")+'" placeholder="Choisis ton mot de passe"></div>'+
+    (signup?
+    '<div class="field"><label for="bio">Biographie (facultative)</label>'+
+    '<textarea id="bio" maxlength="300" placeholder="Parle un peu de toi"></textarea></div>'+
+    '<div class="field"><label for="avatar">Photo de profil (facultative)</label>'+
+    '<input id="avatar" type="file" accept="image/*"></div>':'')+
+    '<button class="btn full" id="authSubmit" type="submit">'+
+    (signup?"Créer mon compte":"Se connecter")+'</button></form>'+
+    '<button class="btn secondary full" style="margin-top:12px" onclick="toggleAuth()">'+
+    (signup?"J’ai déjà un compte":"Créer un compte")+'</button>'+
+    '<p class="small muted" style="text-align:center;margin-top:20px">'+
+    'En continuant, tu acceptes les règles de la communauté.</p>'+
+    '</div></section>';
+}
+
+function toggleAuth(){
+  state.authMode=state.authMode==="signup"?"login":"signup";
+  render();
+}
+
+async function fileToDataURL(file){
+  if(!file)return null;
+  if(file.size>2*1024*1024)throw new Error("Choisis une image de moins de 2 Mo.");
+  if(!file.type.startsWith("image/"))throw new Error("Le fichier doit être une image.");
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=()=>resolve(reader.result);
+    reader.onerror=()=>reject(new Error("Lecture de l’image impossible."));
+    reader.readAsDataURL(file);
+  });
+}
+
+/*
+  Le format de requête utilisé ici doit correspondre à la fonction
+  meiho-auth déployée dans ton projet Supabase.
+*/
+async function authenticate(action,payload){
+  const response=await fetch(AUTH_ENDPOINT,{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json",
+      "apikey":SUPABASE_KEY,
+      "Authorization":"Bearer "+SUPABASE_KEY
+    },
+    body:JSON.stringify({action,...payload})
+  });
+
+  let result={};
+  try{result=await response.json();}catch(_){}
+
+  if(!response.ok || result.error){
+    throw new Error(result.error || result.message || "Opération refusée par le serveur.");
+  }
+  return result;
+}
+
+function normalizeUsername(value){
+  return value.trim().replace(/^@+/,"").toLowerCase();
+}
+
+async function handleAuth(event){
+  event.preventDefault();
+  const button=$("authSubmit");
+  button.disabled=true;
+  button.textContent="Chargement…";
+
+  try{
+    const username=normalizeUsername($("username").value);
+    const password=$("password").value;
+    if(!/^[a-z0-9_.-]{3,30}$/.test(username)){
+      throw new Error("Utilise 3 à 30 caractères : lettres, chiffres, point, tiret ou soulignement.");
+    }
+
+    let payload={username,password};
+
+    if(state.authMode==="signup"){
+      payload.bio=$("bio").value.trim();
+      const file=$("avatar").files[0];
+      if(file)payload.avatar=await fileToDataURL(file);
+    }
+
+    const result=await authenticate(state.authMode==="signup"?"signup":"login",payload);
+
+    const session=result.session || result.data?.session;
+    if(session?.access_token && session?.refresh_token){
+      const sessionResult=await db.auth.setSession({
+        access_token:session.access_token,
+        refresh_token:session.refresh_token
+      });
+      if(sessionResult.error)throw sessionResult.error;
+    }
+
+    const profile=result.profile || result.user || result.data?.profile || result.data?.user;
+    if(!profile){
+      throw new Error("Le serveur a répondu, mais le profil n’a pas été renvoyé.");
+    }
+
+    state.user=profile;
+    state.profile=profile;
+    localStorage.setItem("meiho_profile_cache",JSON.stringify({
+      id:profile.id,username:profile.username,bio:profile.bio,
+      avatar_url:profile.avatar_url,badge_verified:profile.badge_verified
+    }));
+
+    $("bottomNav").classList.remove("hidden");
+    toast(state.authMode==="signup"?"Compte créé. Bienvenue !":"Connexion réussie.");
+    go("chats");
+    await loadChats();
+  }catch(error){
+    toast(error.message || "Une erreur est survenue.");
+  }finally{
+    if($("authSubmit")){
+      $("authSubmit").disabled=false;
+      $("authSubmit").textContent=state.authMode==="signup"?"Créer mon compte":"Se connecter";
+    }
+  }
+}
+
+function renderChats(){
+  return '<section class="page"><div class="row between">'+
+    '<h1 class="page-title">Discussions</h1>'+
+    '<button class="btn" onclick="go(\\'newchat\\')">+ Nouveau</button></div>'+
+    '<input class="search-input" id="chatSearch" placeholder="Rechercher une discussion…">'+
+    '<div id="chatList"><div class="empty">Chargement des discussions…</div></div></section>';
+}
+
+async function loadChats(){
+  if(!state.user?.id)return;
+  const list=$("chatList");
+  if(!list)return;
+
+  try{
+    const {data:members,error}=await db.from("conversation_members")
+      .select("conversation_id")
+      .eq("user_id",state.user.id);
+
+    if(error)throw error;
+
+    const ids=[...new Set((members||[]).map(m=>m.conversation_id))];
+    if(!ids.length){
+      list.innerHTML='<div class="empty">'+icons.message+
+        '<p>Aucune discussion pour le moment.</p>'+
+        '<button class="btn" onclick="go(\\'newchat\\')">Trouver une personne</button></div>';
+      return;
+    }
+
+    const {data:conversations,error:convError}=await db.from("conversations")
+      .select("*").in("id",ids).order("created_at",{ascending:false});
+    if(convError)throw convError;
+
+    const {data:allMembers}=await db.from("conversation_members")
+      .select("conversation_id,user_id").in("conversation_id",ids);
+
+    const others=[...new Set((allMembers||[])
+      .filter(m=>m.user_id!==state.user.id).map(m=>m.user_id))];
+
+    let profiles=[];
+    if(others.length){
+      const result=await db.from("profiles")
+        .select("*").in("id",others);
+      if(!result.error)profiles=result.data||[];
+    }
+
+    state.conversations=conversations||[];
+    list.innerHTML=state.conversations.map(conv=>{
+      const member=(allMembers||[]).find(m=>
+        m.conversation_id===conv.id&&m.user_id!==state.user.id);
+      const person=profiles.find(p=>p.id===member?.user_id)||{};
+      const name=conv.title||person.username||"Discussion";
+      return '<div class="list-item" onclick="openChat(\\''+
+        escapeHTML(conv.id)+'\\')">'+avatarHTML(person)+
+        '<div class="grow"><div class="username">'+
+        escapeHTML(name)+(person.badge_verified?verifiedBadge():"")+
+        '</div><div class="subtitle">Ouvrir la conversation</div></div>'+
+        '<span class="pill">›</span></div>';
+    }).join("");
+  }catch(error){
+    list.innerHTML='<div class="notice">Impossible de charger les discussions : '+
+      escapeHTML(error.message)+'</div>';
+  }
+}
+
+function renderNewChat(){
+  return '<section class="page">'+headerTitle("Nouvelle discussion")+
+    '<div class="field"><label for="findUser">Nom d’utilisateur</label>'+
+    '<input id="findUser" placeholder="@luc_marie"></div>'+
+    '<button class="btn full" onclick="findUser()">Rechercher</button>'+
+    '<div id="userResults"></div></section>';
+}
+
+async function findUser(){
+  const query=normalizeUsername($("findUser").value);
+  if(!query){toast("Entre un nom d’utilisateur.");return;}
+  const target=$("userResults");
+  target.innerHTML='<div class="notice">Recherche…</div>';
+
+  try{
+    const {data,error}=await db.from("profiles")
+      .select("id,username,bio,avatar_url,badge_verified")
+      .eq("username",query).limit(1);
+
+    if(error)throw error;
+    const person=(data||[]).find(p=>p.id!==state.user.id);
+    if(!person){
+      target.innerHTML='<div class="empty">Aucun compte trouvé.</div>';return;
+    }
+    target.innerHTML='<div class="card"><div class="row">'+avatarHTML(person)+
+      '<div class="grow"><div class="username">'+displayName(person)+
+      '</div><div class="subtitle">'+escapeHTML(person.bio||"")+'</div></div></div>'+
+      '<button class="btn full" style="margin-top:15px" onclick="startConversation(\\''+
+      escapeHTML(person.id)+'\\')">Envoyer un message</button></div>';
+  }catch(error){
+    target.innerHTML='<div class="notice">Recherche impossible : '+
+      escapeHTML(error.message)+'</div>';
+  }
+}
+
+async function startConversation(otherId){
+  try{
+    const {data:myMemberships,error}=await db.from("conversation_members")
+      .select("conversation_id").eq("user_id",state.user.id);
+    if(error)throw error;
+
+    const ids=(myMemberships||[]).map(x=>x.conversation_id);
+    if(ids.length){
+      const {data:shared,error:sharedError}=await db.from("conversation_members")
+        .select("conversation_id").eq("user_id",otherId).in("conversation_id",ids);
+      if(sharedError)throw sharedError;
+      if(shared?.length){
+        await openChat(shared[0].conversation_id);return;
+      }
+    }
+
+    const {data:conversation,error:convError}=await db.from("conversations")
+      .insert({conversation_type:"direct",created_by:state.user.id})
+      .select().single();
+    if(convError)throw convError;
+
+    const {error:memberError}=await db.from("conversation_members").insert([
+      {conversation_id:conversation.id,user_id:state.user.id},
+      {conversation_id:conversation.id,user_id:otherId}
+    ]);
+    if(memberError)throw memberError;
+
+    await openChat(conversation.id);
+  }catch(error){
+    toast("Impossible de créer la discussion : "+error.message);
+  }
+}
+
+async function openChat(id){
+  state.selectedConversation=id;
+  state.page="chat";
+  render();
+  await loadMessages();
+}
+
+function renderChat(){
+  return '<div class="chat-header">'+
+    '<button class="icon-button" style="color:var(--text)" onclick="go(\\'chats\\')">'+icons.back+'</button>'+
+    '<div class="grow"><div class="username">Conversation</div>'+
+    '<div class="subtitle">M-EI HO Messengerie</div></div>'+
+    '<button class="icon-button" style="color:var(--text)" onclick="go(\\'chatsettings\\')">'+icons.shield+'</button>'+
+    '</div><div class="chat-messages" id="messageList"></div>'+
+    '<form class="composer" id="messageForm">'+
+    '<input id="messageText" maxlength="5000" autocomplete="off" placeholder="Écrire un message…">'+
+    '<button class="btn" type="submit" aria-label="Envoyer">'+icons.check+'</button></form>';
+}
+
+async function loadMessages(){
+  const list=$("messageList");
+  if(!list||!state.selectedConversation)return;
+
+  try{
+    const {data,error}=await db.from("messages")
+      .select("*").eq("conversation_id",state.selectedConversation)
+      .order("created_at",{ascending:true}).limit(100);
+    if(error)throw error;
+
+    state.messages=data||[];
+    list.innerHTML=state.messages.map(message=>{
+      const mine=message.sender_id===state.user.id;
+      return '<div class="bubble '+(mine?"mine":"")+'">'+
+        escapeHTML(message.content||"")+
+        '<div class="bubble-time">'+
+        new Date(message.created_at).toLocaleTimeString(state.language,{hour:"2-digit",minute:"2-digit"})+
+        '</div></div>';
+    }).join("")||'<div class="empty">Commence la conversation.</div>';
+
+    list.scrollTop=list.scrollHeight;
+    subscribeMessages();
+  }catch(error){
+    list.innerHTML='<div class="notice">Chargement impossible : '+
+      escapeHTML(error.message)+'</div>';
+  }
+}
+
+async function sendMessage(event){
+  event.preventDefault();
+  const input=$("messageText");
+  const content=input.value.trim();
+  if(!content||!state.selectedConversation)return;
+
+  const button=event.submitter;
+  if(button)button.disabled=true;
+
+  try{
+    const {error}=await db.from("messages").insert({
+      conversation_id:state.selectedConversation,
+      sender_id:state.user.id,
+      content,
+      message_type:"text"
+    });
+    if(error)throw error;
+    input.value="";
+    await loadMessages();
+  }catch(error){
+    toast("Envoi impossible : "+error.message);
+  }finally{
+    if(button)button.disabled=false;
+  }
+}
+
+function subscribeMessages(){
+  if(state.subscription){
+    db.removeChannel(state.subscription);
+    state.subscription=null;
+  }
+
+  state.subscription=db.channel("meiho-chat-"+state.selectedConversation)
+    .on("postgres_changes",{
+      event:"INSERT",schema:"public",table:"messages",
+      filter:"conversation_id=eq."+state.selectedConversation
+    },payload=>{
+      const msg=payload.new;
+      if(msg.sender_id!==state.user.id){
+        state.messages.push(msg);
+        const list=$("messageList");
+        if(list){
+          list.insertAdjacentHTML("beforeend",
+            '<div class="bubble">'+escapeHTML(msg.content||"")+
+            '<div class="bubble-time">'+
+            new Date(msg.created_at).toLocaleTimeString(state.language,{hour:"2-digit",minute:"2-digit"})+
+            '</div></div>');
+          list.scrollTop=list.scrollHeight;
+        }
+      }
+    }).subscribe();
+}
+
+function renderActus(){
+  return '<section class="page"><div class="row between">'+
+    '<h1 class="page-title">Actus</h1>'+
+    '<button class="btn" onclick="go(\\'newstory\\')">+ Publier</button></div>'+
+    '<div class="card"><div class="username">Statuts</div>'+
+    '<div id="statusList"><div class="empty">Chargement des statuts…</div></div></div>'+
+    '<div class="row between"><h2>Chaînes</h2>'+
+    '<button class="btn secondary" onclick="go(\\'channels\\')">Découvrir</button></div>'+
+    '<div id="channelList"><div class="empty">Chargement des chaînes…</div></div>'+
+    '<div class="card"><div class="row">'+icons.official+
+    '<div class="grow"><div class="username">M-EI HO Official'+verifiedBadge()+
+    '</div><div class="subtitle">Annonces et nouveautés officielles</div></div>'+
+    '<button class="btn" onclick="go(\\'official\\')">Ouvrir</button></div></div></section>';
+}
+
+async function loadActus(){
+  try{
+    const statusList=$("statusList");
+    if(statusList){
+      const {data,error}=await db.from("statuses").select("*")
+        .order("created_at",{ascending:false}).limit(30);
+      if(error)throw error;
+      statusList.innerHTML=(data||[]).map(s=>
+        '<div class="list-item">'+
+        '<div class="avatar">'+icons.camera+'</div>'+
+        '<div class="grow"><div class="username">'+escapeHTML(s.username||"Statut")+
+        '</div><div class="subtitle">'+escapeHTML(s.content||s.text_content||"Publication")+
+        '</div></div></div>').join("")||'<p class="muted">Aucun statut publié.</p>';
+    }
+
+    const channelList=$("channelList");
+    if(channelList){
+      const {data,error}=await db.from("channels").select("*")
+        .order("created_at",{ascending:false}).limit(30);
+      if(error)throw error;
+      channelList.innerHTML=(data||[]).map(ch=>
+        '<div class="list-item">'+avatarHTML(ch)+
+        '<div class="grow"><div class="username">'+escapeHTML(ch.name)+
+        (ch.is_official?verifiedBadge():"")+
+        '</div><div class="subtitle">'+escapeHTML(ch.description||"Chaîne")+
+        '</div></div><button class="btn secondary" onclick="openChannel(\\''+
+        escapeHTML(ch.id)+'\\')">Ouvrir</button></div>'
+      ).join("")||'<div class="empty">Aucune chaîne disponible.</div>';
+    }
+  }catch(error){toast("Actus : "+error.message);}
+}
+
+function renderNewStory(){
+  return '<section class="page">'+headerTitle("Publier un statut")+
+    '<form id="storyForm"><div class="field"><label for="storyText">Texte</label>'+
+    '<textarea id="storyText" maxlength="1000" placeholder="Que veux-tu partager ?"></textarea></div>'+
+    '<button class="btn full">Publier</button></form>'+
+    '<div class="notice">La durée et la visibilité dépendent de la configuration du serveur.</div></section>';
+}
+
+async function publishStory(event){
+  event.preventDefault();
+  const content=$("storyText").value.trim();
+  if(!content){toast("Écris un texte.");return;}
+  try{
+    const {error}=await db.from("statuses").insert({
+      user_id:state.user.id,content
+    });
+    if(error)throw error;
+    toast("Statut publié.");
+    go("actus");
+    await loadActus();
+  }catch(error){toast("Publication impossible : "+error.message);}
+}
+
+function renderChannels(){
+  return '<section class="page">'+headerTitle("Découvrir les chaînes")+
+    '<button class="btn full" onclick="go(\\'createchannel\\')">+ Créer une chaîne</button>'+
+    '<div id="allChannels"><div class="empty">Chargement…</div></div></section>';
+}
+
+async function loadAllChannels(){
+  try{
+    const {data,error}=await db.from("channels").select("*")
+      .order("created_at",{ascending:false});
+    if(error)throw error;
+    $("allChannels").innerHTML=(data||[]).map(ch=>
+      '<div class="card"><div class="row">'+avatarHTML(ch)+
+      '<div class="grow"><div class="username">'+escapeHTML(ch.name)+
+      (ch.is_official?verifiedBadge():"")+'</div><div class="subtitle">'+
+      escapeHTML(ch.description||"")+'</div></div>'+
+      '<button class="btn" onclick="followChannel(\\''+escapeHTML(ch.id)+'\\')">Suivre</button></div></div>'
+    ).join("")||'<div class="empty">Aucune chaîne disponible.</div>';
+  }catch(error){toast(error.message);}
+}
+
+async function followChannel(id){
+  try{
+    const {error}=await db.from("channel_subscriptions").insert({
+      channel_id:id,user_id:state.user.id
+    });
+    if(error&&error.code!=="23505")throw error;
+    toast("Abonnement enregistré.");
+  }catch(error){toast("Abonnement impossible : "+error.message);}
+}
+
+async function openChannel(id){
+  state.selectedProfile=id;
+  go("channel");
+}
+
+function renderChannel(){
+  return '<section class="page">'+headerTitle("Chaîne")+
+    '<div id="channelDetail"><div class="empty">Chargement…</div></div></section>';
+}
+
+async function loadChannel(){
+  try{
+    const {data:channel,error}=await db.from("channels").select("*")
+      .eq("id",state.selectedProfile).single();
+    if(error)throw error;
+
+    const {data:posts,error:postError}=await db.from("channel_posts")
+      .select("*").eq("channel_id",channel.id)
+      .order("created_at",{ascending:false});
+    if(postError)throw postError;
+
+    $("channelDetail").innerHTML='<div class="card">'+
+      '<div class="row">'+avatarHTML(channel,"large")+
+      '<div class="grow"><h2>'+escapeHTML(channel.name)+
+      (channel.is_official?verifiedBadge():"")+'</h2>'+
+      '<p class="muted">'+escapeHTML(channel.description||"")+'</p></div></div>'+
+      '<button class="btn full" style="margin-top:15px" onclick="followChannel(\\''+
+      escapeHTML(channel.id)+'\\')">Suivre cette chaîne</button></div>'+
+      (posts||[]).map(p=>'<div class="card">'+escapeHTML(p.content||"")+
+      '<div class="subtitle">'+new Date(p.created_at).toLocaleString()+'</div>'+
+      '<button class="btn secondary" onclick="reactToPost(\\''+
+      escapeHTML(p.id)+'\\')">Réagir</button></div>').join("");
+  }catch(error){
+    $("channelDetail").innerHTML='<div class="notice">'+escapeHTML(error.message)+'</div>';
+  }
+}
+
+async function reactToPost(id){
+  const reaction=prompt("Ta réaction (par exemple : 👍, ❤️ ou 👏) :");
+  if(!reaction)return;
+  try{
+    const {error}=await db.from("channel_post_reactions").insert({
+      post_id:id,user_id:state.user.id,reaction
+    });
+    if(error)throw error;
+    toast("Réaction enregistrée.");
+  }catch(error){toast("Réaction impossible : "+error.message);}
+}
+
+function renderCreateChannel(){
+  return '<section class="page">'+headerTitle("Créer une chaîne")+
+    '<form id="createChannelForm">'+
+    '<div class="field"><label for="channelName">Nom</label>'+
+    '<input id="channelName" required maxlength="70"></div>'+
+    '<div class="field"><label for="channelDescription">Description</label>'+
+    '<textarea id="channelDescription" maxlength="500"></textarea></div>'+
+    '<button class="btn full">Créer la chaîne</button></form></section>';
+}
+
+async function createChannel(event){
+  event.preventDefault();
+  try{
+    const {error}=await db.from("channels").insert({
+      owner_id:state.user.id,
+      name:$("channelName").value.trim(),
+      description:$("channelDescription").value.trim()
+    });
+    if(error)throw error;
+    toast("Chaîne créée.");
+    go("channels");
+    await loadAllChannels();
+  }catch(error){toast("Création impossible : "+error.message);}
+}
+
+function renderCommunities(){
+  return '<section class="page"><div class="row between">'+
+    '<h1 class="page-title">Communauté</h1>'+
+    '<button class="btn" onclick="go(\\'createcommunity\\')">+ Créer</button></div>'+
+    '<div id="communityList"><div class="empty">Chargement des communautés…</div></div></section>';
+}
+
+async function loadCommunities(){
+  try{
+    const {data,error}=await db.from("communities").select("*")
+      .order("created_at",{ascending:false});
+    if(error)throw error;
+
+    $("communityList").innerHTML=(data||[]).map(c=>
+      '<div class="card"><div class="row">'+avatarHTML(c)+
+      '<div class="grow"><div class="username">'+escapeHTML(c.name)+'</div>'+
+      '<div class="subtitle">'+escapeHTML(c.description||"")+'</div></div>'+
+      '<button class="btn" onclick="joinCommunity(\\''+escapeHTML(c.id)+'\\')">Rejoindre</button></div></div>'
+    ).join("")||'<div class="empty">Aucune communauté disponible.</div>';
+  }catch(error){toast("Communautés : "+error.message);}
+}
+
+async function joinCommunity(id){
+  try{
+    const {error}=await db.from("community_members").insert({
+      community_id:id,user_id:state.user.id
+    });
+    if(error&&error.code!=="23505")throw error;
+    toast("Tu as rejoint la communauté.");
+  }catch(error){toast("Impossible de rejoindre : "+error.message);}
+}
+
+function renderCreateCommunity(){
+  return '<section class="page">'+headerTitle("Créer une communauté")+
+    '<form id="createCommunityForm">'+
+    '<div class="field"><label for="communityName">Nom du groupe</label>'+
+    '<input id="communityName" required maxlength="80"></div>'+
+    '<div class="field"><label for="communityDescription">Description</label>'+
+    '<textarea id="communityDescription" maxlength="500"></textarea></div>'+
+    '<button class="btn full">Créer</button></form></section>';
+}
+
+async function createCommunity(event){
+  event.preventDefault();
+  try{
+    const {data,error}=await db.from("communities").insert({
+      name:$("communityName").value.trim(),
+      description:$("communityDescription").value.trim(),
+      created_by:state.user.id
+    }).select().single();
+    if(error)throw error;
+
+    const {error:memberError}=await db.from("community_members").insert({
+      community_id:data.id,user_id:state.user.id
+    });
+    if(memberError)throw memberError;
+    toast("Communauté créée.");
+    go("communities");
+    await loadCommunities();
+  }catch(error){toast("Création impossible : "+error.message);}
+}
+
+function renderCalls(){
+  return '<section class="page"><h1 class="page-title">Appel</h1>'+
+    '<div class="card">'+icons.message+
+    '<h3>Appels audio et vidéo</h3>'+
+    '<p class="muted">L’historique sera affiché ici une fois les appels configurés.</p>'+
+    '<div class="notice">Les appels nécessitent un service de signalisation et une connexion WebRTC sécurisée.</div>'+
+    '</div><div id="callHistory"></div></section>';
+}
+
+async function loadCalls(){
+  try{
+    const {data,error}=await db.from("calls").select("*")
+      .order("created_at",{ascending:false}).limit(50);
+    if(error)throw error;
+
+    $("callHistory").innerHTML=(data||[]).map(c=>
+      '<div class="list-item">'+
+      '<div class="avatar">'+icons.message+'</div>'+
+      '<div class="grow"><div class="username">'+escapeHTML(c.status||"Appel")+
+      '</div><div class="subtitle">'+
+      (c.created_at?new Date(c.created_at).toLocaleString():"")+
+      '</div></div></div>'
+    ).join("")||'<div class="empty">Aucun appel enregistré.</div>';
+  }catch(error){
+    $("callHistory").innerHTML='<div class="notice">Historique indisponible : '+
+      escapeHTML(error.message)+'</div>';
+  }
+}
+
+function renderOfficial(){
+  return '<section class="page">'+headerTitle("M-EI HO Official")+
+    '<div class="card"><div class="row">'+
+    '<div class="avatar large">M</div><div class="grow">'+
+    '<div class="username">M-EI HO Official'+verifiedBadge()+'</div>'+
+    '<div class="subtitle">Chaîne officielle</div></div></div>'+
+    '<p class="muted">Les annonces officielles et les nouveautés de l’application.</p>'+
+    '<div class="notice">🔒 Chaîne lecture seule - Personne ne peut envoyer</div>'+
+    '<button class="btn full" onclick="followOfficial()">S’abonner</button></div>'+
+    '<div id="officialPosts"><div class="empty">Chargement des annonces…</div></div></section>';
+}
+
+async function followOfficial(){
+  try{
+    const {data,error}=await db.from("channels").select("id")
+      .eq("is_official",true).limit(1).maybeSingle();
+    if(error)throw error;
+    if(!data){toast("La chaîne officielle doit être créée par l’administrateur.");return;}
+    await followChannel(data.id);
+  }catch(error){toast("Abonnement impossible : "+error.message);}
+}
+
+async function loadOfficial(){
+  try{
+    const {data,error}=await db.from("meiho_announcements").select("*")
+      .order("created_at",{ascending:false}).limit(50);
+    if(error)throw error;
+    $("officialPosts").innerHTML=(data||[]).map(p=>
+      '<div class="card"><h3>'+escapeHTML(p.title||"Annonce")+'</h3>'+
+      '<p>'+escapeHTML(p.content||"")+'</p>'+
+      '<div class="subtitle">'+new Date(p.created_at).toLocaleString()+'</div>'+
+      '<button class="btn secondary" onclick="reactAnnouncement(\\''+
+      escapeHTML(p.id)+'\\')">Réagir</button></div>'
+    ).join("")||'<div class="empty">Aucune annonce publiée.</div>';
+  }catch(error){
+    $("officialPosts").innerHTML='<div class="notice">Annonces indisponibles : '+
+      escapeHTML(error.message)+'</div>';
+  }
+}
+
+async function reactAnnouncement(id){
+  const reaction=prompt("Ta réaction :");
+  if(!reaction)return;
+  toast("Les réactions aux annonces doivent être reliées à une table dédiée.");
+}
+
+function renderSettings(){
+  const settings=[
+    ["profile","Mon compte","Profil, bio et photo",icons.user],
+    ["privacy","Confidentialité","Contrôler les informations visibles",icons.shield],
+    ["appearance","Apparence","Thème clair ou sombre",icons.sun],
+    ["notifications","Notifications","Préférences de notification",icons.bell],
+    ["language","Langue","Langue de l’application",icons.official],
+    ["verification","Badge de vérification","Demander une vérification",icons.check],
+    ["help","Aide","Informations et assistance",icons.message],
+    ["about","À propos","M-EI HO Messengerie",icons.official]
+  ];
+  return '<section class="page">'+headerTitle("Paramètres")+
+    '<div class="card">'+
+    '<div class="row">'+avatarHTML(state.profile||state.user,"large")+
+    '<div class="grow"><div class="username">'+displayName(state.profile||state.user)+'</div>'+
+    '<div class="subtitle">'+escapeHTML(state.profile?.bio||"")+'</div></div>'+
+    '</div></div><div class="card">'+
+    settings.map(s=>'<div class="list-item" onclick="go(\\''+s[0]+'\\')">'+
+      '<div style="color:var(--blue)">'+s[3]+'</div>'+
+      '<div class="grow"><div class="username">'+s[1]+'</div>'+
+      '<div class="subtitle">'+s[2]+'</div></div><span>›</span></div>').join("")+
+    '</div><button class="btn danger full" onclick="logout()">Se déconnecter</button></section>';
+}
+
+function renderProfile(){
+  const p=state.profile||state.user||{};
+  return '<section class="page">'+headerTitle("Mon compte")+
+    '<div class="card"><div class="profile-head">'+avatarHTML(p,"large")+
+    '<h2>'+displayName(p)+'</h2><p class="muted">'+escapeHTML(p.bio||"")+'</p></div>'+
+    '<form id="profileForm">'+
+    '<div class="field"><label for="profileBio">Biographie</label>'+
+    '<textarea id="profileBio" maxlength="300">'+escapeHTML(p.bio||"")+'</textarea></div>'+
+    '<button class="btn full">Enregistrer les modifications</button></form>'+
+    '</div><div class="card"><div class="username">Vérification</div>'+
+    '<p class="muted">Statut du compte</p>'+
+    '<div>'+(p.badge_verified?'<span class="badge-label">Compte vérifié</span>':'Pas encore vérifié')+
+    '</div></div></section>';
+}
+
+async function saveProfile(event){
+  event.preventDefault();
+  const bio=$("profileBio").value.trim();
+  try{
+    const {error}=await db.from("profiles").update({bio})
+      .eq("id",state.user.id);
+    if(error)throw error;
+    state.profile={...state.profile,bio};
+    toast("Profil mis à jour.");
+    go("profile");
+  }catch(error){toast("Modification impossible : "+error.message);}
+}
+
+function renderAppearance(){
+  return '<section class="page">'+headerTitle("Apparence")+
+    '<div class="card"><h3>Thème de l’application</h3>'+
+    '<div class="setting-row"><span>Clair</span>'+
+    '<input type="radio" name="theme" value="light" '+(state.theme==="light"?"checked":"")+
+    ' onchange="changeTheme(this.value)"></div>'+
+    '<div class="setting-row"><span>Sombre</span>'+
+    '<input type="radio" name="theme" value="dark" '+(state.theme==="dark"?"checked":"")+
+    ' onchange="changeTheme(this.value)"></div>'+
+    '<p class="muted small">Le thème choisi s’applique à l’ensemble de l’interface.</p>'+
+    '</div></section>';
+}
+
+function changeTheme(theme){
+  state.theme=theme;applyTheme();render();
+}
+
+function renderLanguage(){
+  const langs=[["fr","Français"],["en","English"],["sw","Kiswahili"]];
+  return '<section class="page">'+headerTitle("Langue")+
+    '<div class="card"><label for="languageSelect">Choisir une langue</label>'+
+    '<select id="languageSelect" class="search-input" onchange="changeLanguage(this.value)">'+
+    langs.map(l=>'<option value="'+l[0]+'" '+(state.language===l[0]?"selected":"")+'>'+
+    l[1]+'</option>').join("")+'</select>'+
+    '<p class="muted small">Le choix sera enregistré. La traduction complète de toutes les pages devra être intégrée séparément.</p>'+
+    '</div></section>';
+}
+
+function changeLanguage(language){
+  state.language=language;
+  localStorage.setItem("meiho_language",language);
+  toast("Préférence de langue enregistrée.");
+}
+
+function renderNotifications(){
+  return '<section class="page">'+headerTitle("Notifications")+
+    '<div class="card"><div class="setting-row"><div><b>Notifications</b>'+
+    '<div class="subtitle">Préférence locale</div></div>'+
+    '<input id="notificationsToggle" type="checkbox" checked></div>'+
+    '<button class="btn full" onclick="saveNotifications()">Enregistrer</button>'+
+    '<p class="muted small">La livraison en arrière-plan nécessite un service de notifications adapté à la plateforme.</p></div></section>';
+}
+
+function saveNotifications(){
+  localStorage.setItem("meiho_notifications",
+    $("notificationsToggle").checked?"on":"off");
+  toast("Préférence enregistrée sur cet appareil.");
+}
+
+function renderPrivacy(){
+  return '<section class="page">'+headerTitle("Confidentialité")+
+    '<div class="card"><div class="setting-row"><span>Confirmations de lecture</span>'+
+    '<input id="readReceipts" type="checkbox" checked></div>'+
+    '<div class="setting-row"><span>Visibilité du profil</span>'+
+    '<select id="profileVisibility"><option value="everyone">Tout le monde</option>'+
+    '<option value="contacts">Mes contacts</option></select></div>'+
+    '<button class="btn full" onclick="savePrivacy()">Enregistrer</button>'+
+    '<p class="muted small">Les contrôles serveur doivent appliquer ces préférences pour garantir leur efficacité.</p></div></section>';
+}
+
+function savePrivacy(){
+  localStorage.setItem("meiho_read_receipts",$("readReceipts").checked?"on":"off");
+  localStorage.setItem("meiho_profile_visibility",$("profileVisibility").value);
+  toast("Préférences enregistrées sur cet appareil.");
+}
+
+function renderVerification(){
+  return '<section class="page">'+headerTitle("Badge de vérification")+
+    '<div class="card"><div class="row">'+
+    '<span class="verified">'+icons.check+'</span>'+
+    '<div class="grow"><div class="username">Badge M-EI HO</div>'+
+    '<div class="subtitle">Cercle vert de 15 px avec coche blanche</div></div></div>'+
+    '<p>Les demandes sont soumises aux conditions de vérification.</p>'+
+    '<form id="verificationForm">'+
+    '<div class="field"><label for="verificationCategory">Catégorie</label>'+
+    '<select id="verificationCategory" required>'+
+    '<option value="professional">Professionnel</option>'+
+    '<option value="public_figure">Personnalité publique</option>'+
+    '<option value="business">Entreprise</option></select></div>'+
+    '<div class="field"><label for="verificationBio">Présente ton activité</label>'+
+    '<textarea id="verificationBio" required maxlength="1000"></textarea></div>'+
+    '<button class="btn full">Envoyer ma demande</button></form>'+
+    '<div class="notice">Les cinq attributions gratuites doivent être réservées et contrôlées côté serveur. Cette page ne peut pas attribuer un badge à elle seule.</div>'+
+    '</div></section>';
+}
+
+async function submitVerification(event){
+  event.preventDefault();
+  try{
+    const {error}=await db.from("verification_requests").insert({
+      user_id:state.user.id,
+      category:$("verificationCategory").value,
+      justification:$("verificationBio").value.trim(),
+      status:"pending"
+    });
+    if(error)throw error;
+    toast("Demande envoyée.");
+    go("settings");
+  }catch(error){
+    toast("Demande impossible : "+error.message);
+  }
+}
+
+function renderHelp(){
+  return '<section class="page">'+headerTitle("Aide")+
+    '<div class="card"><h3>Centre d’aide M-EI HO</h3>'+
+    '<p>Consulte les paramètres pour gérer ton profil, tes préférences et ta confidentialité.</p>'+
+    '<p class="muted">Les demandes d’assistance et les signalements devront être reliés au service de gestion correspondant.</p></div></section>';
+}
+
+function renderAbout(){
+  return '<section class="page">'+headerTitle("À propos")+
+    '<div class="card" style="text-align:center"><div class="auth-logo">M</div>'+
+    '<h2>M-EI HO Messengerie</h2>'+
+    '<p class="muted">Une application de communication conçue pour rester connecté.</p>'+
+    '<p class="small muted">Les fonctionnalités disponibles dépendent des services configurés.</p></div></section>';
+}
+
+function renderChatSettings(){
+  return '<section class="page">'+headerTitle("Paramètres de discussion")+
+    '<div class="card"><h3>Options de conversation</h3>'+
+    '<p class="muted">Le réglage des messages éphémères et des fonds de discussion doit être associé aux paramètres serveur de la conversation.</p>'+
+    '<button class="btn full" onclick="toast(\\'Configuration à relier au serveur.\\')">Messages éphémères</button>'+
+    '<button class="btn secondary full" style="margin-top:10px" onclick="go(\\'appearance\\')">Modifier le thème général</button>'+
+    '</div></section>';
+}
+
+function renderSearch(){
+  return '<section class="page">'+headerTitle("Rechercher")+
+    '<div class="field"><label for="globalSearch">Nom d’utilisateur</label>'+
+    '<input id="globalSearch" placeholder="Rechercher un compte"></div>'+
+    '<button class="btn full" onclick="globalFind()">Rechercher</button>'+
+    '<div id="globalResults"></div></section>';
+}
+
+async function globalFind(){
+  const input=$("globalSearch").value.trim();
+  $("globalResults").innerHTML="";
+  $("findUser").value=input;
+  go("newchat");
+  $("findUser").value=input;
+  await findUser();
+}
+
+async function renderReports(){
+  return '<section class="page">'+headerTitle("Signaler un problème")+
+    '<div class="card"><form id="reportForm">'+
+    '<div class="field"><label for="reportText">Description</label>'+
+    '<textarea id="reportText" required maxlength="2000"></textarea></div>'+
+    '<button class="btn full">Envoyer le signalement</button>'+
+    '</form></div></section>';
+}
+
+async function submitReport(event){
+  event.preventDefault();
+  try{
+    const {error}=await db.from("reports").insert({
+      reporter_id:state.user.id,
+      description:$("reportText").value.trim()
+    });
+    if(error)throw error;
+    toast("Signalement envoyé.");
+    go("settings");
+  }catch(error){toast("Envoi impossible : "+error.message);}
+}
+
+function render(){
+  if(!state.user && !["guide","auth"].includes(state.page)){
+    state.page="guide";
+  }
+
+  setNavActive(state.page);
+
+  $("bottomNav").classList.toggle("hidden",
+    !state.user||["guide","auth","chat","newchat","settings","profile",
+    "privacy","appearance","notifications","language","verification",
+    "help","about","chatsettings","search","channels","channel",
+    "createchannel","createcommunity","newstory"].includes(state.page)
+  );
+
+  const pages={
+    guide:renderGuide,
+    auth:renderAuth,
+    chats:renderChats,
+    newchat:renderNewChat,
+    chat:renderChat,
+    actus:renderActus,
+    newstory:renderNewStory,
+    channels:renderChannels,
+    channel:renderChannel,
+    createchannel:renderCreateChannel,
+    communities:renderCommunities,
+    createcommunity:renderCreateCommunity,
+    calls:renderCalls,
+    official:renderOfficial,
+    settings:renderSettings,
+    profile:renderProfile,
+    appearance:renderAppearance,
+    language:renderLanguage,
+    notifications:renderNotifications,
+    privacy:renderPrivacy,
+    verification:renderVerification,
+    help:renderHelp,
+    about:renderAbout,
+    chatsettings:renderChatSettings,
+    search:renderSearch,
+    reports:renderReports
+  };
+
+  main.innerHTML=(pages[state.page]||renderChats)();
+
+  if(state.page==="chats")loadChats();
+  if(state.page==="actus")loadActus();
+  if(state.page==="channels")loadAllChannels();
+  if(state.page==="channel")loadChannel();
+  if(state.page==="communities")loadCommunities();
+  if(state.page==="calls")loadCalls();
+  if(state.page==="official")loadOfficial();
+
+  if(state.page==="auth")$("authForm").addEventListener("submit",handleAuth);
+  if(state.page==="chat")$("messageForm").addEventListener("submit",sendMessage);
+  if(state.page==="newstory")$("storyForm").addEventListener("submit",publishStory);
+  if(state.page==="createchannel")$("createChannelForm").addEventListener("submit",createChannel);
+  if(state.page==="createcommunity")$("createCommunityForm").addEventListener("submit",createCommunity);
+  if(state.page==="profile")$("profileForm").addEventListener("submit",saveProfile);
+  if(state.page==="verification")$("verificationForm").addEventListener("submit",submitVerification);
+  if(state.page==="reports")$("reportForm").addEventListener("submit",submitReport);
+
+  if(state.page==="chats"){
+    $("chatSearch").addEventListener("input",event=>{
+      const query=event.target.value.toLowerCase();
+      document.querySelectorAll("#chatList .list-item").forEach(item=>{
+        item.style.display=item.textContent.toLowerCase().includes(query)?"flex":"none";
+      });
+    });
+  }
+}
+
+async function logout(){
+  if(state.subscription)await db.removeChannel(state.subscription);
+  state.subscription=null;
+  await db.auth.signOut().catch(()=>{});
+  state.user=null;
+  state.profile=null;
+  state.messages=[];
+  state.conversations=[];
+  state.selectedConversation=null;
+  localStorage.removeItem("meiho_profile_cache");
+  $("bottomNav").classList.add("hidden");
+  state.authMode="login";
+  go("auth");
+}
+
+$("settingsButton").addEventListener("click",()=>{
+  if(state.user)go("settings");
+  else go("auth");
+});
+
+$("searchButton").addEventListener("click",()=>{
+  if(state.user)go("search");
+  else go("auth");
+});
+
+document.querySelectorAll(".nav-button").forEach(button=>{
+  button.addEventListener("click",()=>go(button.dataset.page));
+});
+
+applyTheme();
+
+/* Démarrage visuel de trois secondes. */
+setTimeout(()=>{
+  showApplication();
+  const cached=localStorage.getItem("meiho_profile_cache");
+
+  if(cached){
+    try{
+      state.profile=JSON.parse(cached);
+    }catch(_){}
+  }
+
+  /*
+    Le cache du profil n'est pas une preuve d'authentification.
+    L'utilisateur devra ouvrir une session valide.
+  */
+  showGuide();
+},3000);
+</script>
+</body>
+  </html>
