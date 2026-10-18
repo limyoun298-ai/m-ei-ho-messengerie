@@ -1,0 +1,27 @@
+{
+  "name": "M-EI HO Messengerie",
+  "short_name": "MEIHO",
+  "description": "M-EI HO : discussions, actualités, communautés et appels.",
+  "id": "com.m-ei-ho-messengerie",
+  "start_url": "/m-ei-ho-messengerie/",
+  "scope": "/m-ei-ho-messengerie/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#ffffff",
+  "theme_color": "#0b141a",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/733/733585.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/733/733585.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+    }
