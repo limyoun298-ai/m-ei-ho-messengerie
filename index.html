@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b141a">
+<meta name="description" content="M-EI HO Messengerie : discussions, actualités et communautés.">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="M-EI HO">
+<link rel="manifest" href="/m-ei-ho-messengerie/manifest.json">
+<link rel="icon" href="https://cdn-icons-png.flaticon.com/512/733/733585.png">
+<title>M-EI HO Messengerie v2.26.41.4</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--bg:#0b141a;--bar:#202c33;--panel:#111b21;--blue:#2589ff;--green:#25d366;--text:#e9edef;--muted:#8696a0;--border:#2a3942}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}
+body{height:100dvh}
+button,input,textarea{font:inherit}
+button{cursor:pointer}
+button:disabled{opacity:.5}
+.hidden{display:none!important}
+header{height:62px;flex-shrink:0;background:var(--bar);display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-bottom:1px solid var(--border)}
+.brand{display:flex;align-items:center;gap:9px;font-size:18px;font-weight:bold}
+.logo{width:38px;height:38px;border:2px solid var(--blue);border-radius:50%;display:grid;place-items:center;font-size:22px;font-weight:bold}
+.actions{display:flex;gap:4px}
+.icon{width:42px;height:42px;border:0;border-radius:50%;background:transparent;color:var(--text);font-size:23px}
+main{display:flex;flex:1;min-height:0}
+#app{height:100dvh;display:flex;flex-direction:column}
+aside{width:350px;max-width:43%;display:flex;flex-direction:column;background:var(--panel);border-right:1px solid var(--border);min-height:0}
+#list{overflow:auto;flex:1}
+.search{padding:10px}
+input,textarea{width:100%;padding:12px;border-radius:9px;border:1px solid var(--border);background:var(--bar);color:var(--text);outline:none;margin:4px 0}
+input:focus,textarea:focus{border-color:var(--blue)}
+.row{display:flex;align-items:center;gap:12px;padding:12px;border-bottom:1px solid var(--border);cursor:pointer}
+.row:hover{background:#ffffff08}
+.avatar{width:44px;height:44px;flex-shrink:0;border-radius:50%;background:#30434d;display:grid;place-items:center;font-size:20px;overflow:hidden}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.rowtext{flex:1;min-width:0;overflow-wrap:anywhere}
+.rowtext strong{display:block}
+.rowtext small{display:block;color:var(--muted);margin-top:4px}
+#chat{flex:1;min-width:0;display:flex;flex-direction:column}
+#chatHeader{min-height:62px;background:var(--bar);padding:10px;display:flex;align-items:center;gap:10px}
+#messages{flex:1;overflow:auto;padding:14px}
+.bubble{width:fit-content;max-width:88%;padding:10px 12px;border-radius:10px;background:var(--bar);margin:8px 0;white-space:pre-wrap;overflow-wrap:anywhere}
+.bubble.mine{margin-left:auto;background:#005c4b}
+.bubble small{display:block;color:#b8c7ce;font-size:10px;margin-top:5px}
+#composer{display:flex;gap:8px;padding:9px;background:var(--bar)}
+#composer input{flex:1;min-width:0}
+.primary,.secondary{border-radius:8px;padding:11px 14px;font-weight:bold}
+.primary{background:var(--blue);color:white;border:0}
+.secondary{background:var(--bar);color:var(--text);border:1px solid var(--border)}
+.bottom-nav{display:flex;justify-content:space-around;min-height:66px;background:#101a20;border-top:1px solid var(--border);padding-bottom:env(safe-area-inset-bottom)}
+.bottom-nav button{flex:1;background:transparent;border:0;color:var(--muted);font-size:11px}
+.bottom-nav button.active{color:var(--blue)}
+.bottom-nav span{display:block;margin-top:4px}
+.badge{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:var(--green);color:white;font-size:12px;font-weight:bold;margin-left:5px;vertical-align:middle}
+#auth,#guideScreen{position:fixed;inset:0;z-index:100;background:radial-gradient(circle at top,#17364d,#0b141a 65%);display:grid;place-items:center;padding:18px;overflow:auto}
+.authbox,.guide-card{width:100%;max-width:420px;background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:22px}
+.authbox h1,.guide-card{text-align:center}
+.note,.muted{font-size:12px;color:var(--muted);line-height:1.5}
+.authbox button{width:100%;margin-top:8px}
+.authbox>.logo{margin:auto;width:70px;height:70px;font-size:40px}
+#toast{position:fixed;z-index:200;bottom:80px;left:50%;transform:translateX(-50%);background:#263941;border:1px solid #3a5360;border-radius:10px;padding:12px 16px;max-width:92%;display:none}
+#profilePanel,#callPanel{padding:16px;overflow:auto;flex:1}
+.empty{text-align:center;color:var(--muted);padding:24px;line-height:1.5}
+.official-hero{padding:16px;border:1px solid #24425a;border-radius:14px;text-align:center;background:linear-gradient(145deg,#122d43,#17252c);margin-bottom:15px}
+.official-logo{width:78px;height:78px;border:2px solid var(--blue);border-radius:50%;display:grid;place-items:center;font-size:46px;margin:auto}
+#menuPanel{position:absolute;right:8px;top:52px;width:220px;padding:6px;background:#17252c;border:1px solid var(--border);border-radius:12px;z-index:50}
+#menuPanel button{width:100%;padding:12px;text-align:left;background:transparent;color:var(--text);border:0}
+#menuWrap{position:relative}
+@media(max-width:650px){
+ aside{width:100%;max-width:100%;border:0}
+ #chat{display:none}
+ body.chat-open aside{display:none}
+ body.chat-open #chat{display:flex}
+ .back{display:inline-block!important}
+}
+@media(min-width:651px){.back{display:none!important}}
+</style>
+</head>
+<body>
+
+<section id="guideScreen" class="hidden">
+ <div class="guide-card">
+  <div class="logo" style="width:90px;height:90px;font-size:52px;margin:auto">M</div>
+  <h2 id="guideTitle">Bienvenue sur M-EI HO</h2>
+  <p id="guideText" class="muted">Discute avec les autres utilisateurs.</p>
+  <p id="guideDots">● ○ ○</p>
+  <button class="secondary" id="guideSkip">Passer</button>
+  <button class="primary" id="guideNext">Suivant</button>
+ </div>
+</section>
+
+<section id="auth" class="hidden">
+ <div class="authbox">
+  <div class="logo">M</div>
+  <h1>M-EI HO</h1>
+  <p class="note" style="text-align:center">Messengerie v2.26.41.4</p>
+  <input id="username" placeholder="Nom d'utilisateur" maxlength="30" autocomplete="username" autocapitalize="none">
+  <input id="password" type="password" placeholder="Mot de passe" autocomplete="current-password">
+  <div id="registerFields" class="hidden">
+   <input id="bio" placeholder="Bio facultative" maxlength="160">
+   <label class="note">Photo de profil facultative</label>
+   <input id="avatarFile" type="file" accept="image/*">
+  </div>
+  <button class="primary" id="loginBtn">Se connecter</button>
+  <button class="secondary" id="showRegister">Créer un compte</button>
+  <button class="primary hidden" id="registerBtn">Créer mon compte</button>
+  <button class="secondary hidden" id="backLogin">Retour à la connexion</button>
+  <p id="authStatus" class="note" role="status"></p>
+  <p class="note">Aucun e-mail ni numéro de téléphone n'est demandé.</p>
+ </div>
+</section>
+
+<div id="app" class="hidden">
+ <header>
+  <div class="brand"><div class="logo">M</div><span>M-EI HO</span></div>
+  <div class="actions">
+   <button class="icon" id="searchToggle" aria-label="Rechercher"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg></button>
+   <div id="menuWrap">
+    <button class="icon" id="menuToggle" aria-label="Paramètres"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></button>
+    <div id="menuPanel" class="hidden">
+     <button data-action="profile">Mon profil</button>
+     <button data-action="users">Rechercher des utilisateurs</button>
+     <button data-action="official">M-EI HO Official</button>
+     <button data-action="settings">Paramètres</button>
+     <button data-action="logout">Se déconnecter</button>
+    </div>
+   </div>
+  </div>
+ </header>
+
+ <main>
+  <aside id="sidePanel">
+   <div class="search hidden" id="searchBox">
+    <input id="search" placeholder="Rechercher..." autocomplete="off">
+   </div>
+   <div id="list"></div>
+   <div id="profilePanel" class="hidden"></div>
+   <div id="callPanel" class="hidden"></div>
+  </aside>
+  <section id="chat">
+   <div id="chatHeader"><div class="avatar">M</div><strong>M-EI HO</strong></div>
+   <div id="messages"><div class="empty">Choisis une discussion.</div></div>
+   <div id="composer" class="hidden">
+    <input id="messageInput" maxlength="4000" placeholder="Écris un message...">
+    <button class="primary" id="sendBtn">Envoyer</button>
+   </div>
+  </section>
+ </main>
+
+ <nav class="bottom-nav">
+  <button class="active" data-tab="chats">▤<span>Discussions</span></button>
+  <button data-tab="channels">▧<span>Actus</span></button>
+  <button data-tab="communities">♧<span>Communauté</span></button>
+  <button data-tab="calls">☎<span>Appel</span></button>
+ </nav>
+</div>
+<div id="toast" role="status"></div>
+
+<script>
+'use strict';
+
+const SUPABASE_URL='https://zwteqiwdnvmtofaodnhm.supabase.co';
+const SUPABASE_KEY='sb_publishable_IDyqhFxJEuIWtOo46jwj8w_BOeQfcX3';
+const AUTH_URL=SUPABASE_URL+'/functions/v1/meiho-auth';
+
+const $=id=>document.getElementById(id);
+let db=null,currentUser=null,currentProfile=null;
+let activeTab='chats',selectedUser=null,selectedConversation=null;
+let allProfiles=[],allConversations=[],allChannels=[],allCommunities=[];
+let messageSubscription=null,isOfficial=false,guidePage=0,authMode='login';
+let loadVersion=0;
+
+const guideSteps=[
+ ['Bienvenue sur M-EI HO','Un espace pour discuter, découvrir des actualités et rejoindre des communautés.'],
+ ['Reste connecté','Retrouve tes discussions avec les autres utilisateurs.'],
+ ['Découvre les Actus','Explore les chaînes, les communautés et les autres fonctions.']
+];
+
+function toast(message){
+ $('toast').textContent=String(message||'');
+ $('toast').style.display='block';
+ clearTimeout(window.toastTimer);
+ window.toastTimer=setTimeout(()=>$('toast').style.display='none',3500);
+}
+function showScreen(id){
+ ['guideScreen','auth','app'].forEach(x=>$(x).classList.toggle('hidden',x!==id));
+}
+function showGuide(){
+ guidePage=0;renderGuide();showScreen('guideScreen');
+}
+function renderGuide(){
+ const s=guideSteps[guidePage];
+ $('guideTitle').textContent=s[0];
+ $('guideText').textContent=s[1];
+ $('guideDots').textContent=['○','○','○'].map((x,i)=>i===guidePage?'●':x).join(' ');
+ $('guideNext').textContent=guidePage===2?'Commencer':'Suivant';
+}
+function finishGuide(){
+ localStorage.setItem('meiho_guide_completed','1');
+ showScreen('auth');
+}
+$('guideNext').onclick=()=>{if(guidePage<2){guidePage++;renderGuide()}else finishGuide()};
+$('guideSkip').onclick=finishGuide;
+
+function showRegister(){
+ authMode='register';
+ $('registerFields').classList.remove('hidden');
+ $('loginBtn').classList.add('hidden');
+ $('showRegister').classList.add('hidden');
+ $('registerBtn').classList.remove('hidden');
+ $('backLogin').classList.remove('hidden');
+ $('password').autocomplete='new-password';
+ $('authStatus').textContent='Choisis un nom et un mot de passe d’au moins 8 caractères.';
+}
+function showLogin(){
+ authMode='login';
+ $('registerFields').classList.add('hidden');
+ $('loginBtn').classList.remove('hidden');
+ $('showRegister').classList.remove('hidden');
+ $('registerBtn').classList.add('hidden');
+ $('backLogin').classList.add('hidden');
+ $('password').autocomplete='current-password';
+ $('authStatus').textContent='';
+}
+$('showRegister').onclick=showRegister;
+$('backLogin').onclick=showLogin;
+$('loginBtn').onclick=()=>authenticate('login');
+$('registerBtn').onclick=()=>authenticate('register');
+
+function resizeImage(file){
+ return new Promise((resolve,reject)=>{
+  if(!file)return resolve(null);
+  if(!file.type.startsWith('image/'))return reject(new Error('Choisis une image valide.'));
+  const reader=new FileReader();
+  reader.onerror=()=>reject(new Error('Lecture de la photo impossible.'));
+  reader.onload=()=>{
+   const img=new Image();
+   img.onerror=()=>reject(new Error('Image invalide.'));
+   img.onload=()=>{
+    const canvas=document.createElement('canvas');
+    const scale=Math.min(1,400/Math.max(img.width,img.height));
+    canvas.width=Math.round(img.width*scale);
+    canvas.height=Math.round(img.height*scale);
+    canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);
+    resolve(canvas.toDataURL('image/jpeg',.78));
+   };
+   img.src=reader.result;
+  };
+  reader.readAsDataURL(file);
+ });
+}
+
+async function authenticate(action){
+ const username=$('username').value.trim();
+ const password=$('password').value;
+ const status=$('authStatus');
+ if(!/^[a-zA-Z0-9_]{3,30}$/.test(username)){
+  status.textContent='Le nom doit contenir de 3 à 30 caractères : lettres, chiffres ou _.';
+  return;
+ }
+ if(password.length<8){
+  status.textContent='Le mot de passe doit contenir au moins 8 caractères.';
+  return;
+ }
+ $('loginBtn').disabled=true;$('registerBtn').disabled=true;
+ status.textContent='Connexion en cours...';
+ try{
+  const payload={action:action==='register'?'signup':'login',username,password};
+  if(action==='register'){
+   payload.bio=$('bio').value.trim();
+   const file=$('avatarFile').files[0];
+   if(file){
+    if(file.size>8*1024*1024)throw new Error('La photo doit faire moins de 8 Mo.');
+    payload.avatar_url=await resizeImage(file);
+   }
+  }
+  const response=await fetch(AUTH_URL,{
+   method:'POST',
+   headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY},
+   body:JSON.stringify(payload)
+  });
+  const result=await response.json().catch(()=>({}));
+  if(!response.ok||!result.success)throw new Error(result.error||result.message||'Authentification refusée.');
+  if(!result.session?.access_token||!result.session?.refresh_token)
+   throw new Error('La fonction Supabase n’a pas renvoyé de session valide.');
+  const {error}=await db.auth.setSession({access_token:result.session.access_token,refresh_token:result.session.refresh_token});
+  if(error)throw error;
+  const {data,error:userError}=await db.auth.getUser();
+  if(userError||!data.user)throw new Error('Session non confirmée.');
+  currentUser=data.user;currentProfile=result.user||null;
+  localStorage.setItem('meiho_guide_completed','1');
+  localStorage.setItem('meiho_account_created','1');
+  showScreen('app');
+  await initializeApp();
+  if(action==='register')await openOfficial();
+  toast(action==='register'?'Compte créé !':'Connexion réussie !');
+ }catch(error){
+  console.error(error);status.textContent=error.message||'Une erreur est survenue.';
+ }finally{
+  $('loginBtn').disabled=false;$('registerBtn').disabled=false;
+ }
+}
+
+async function restoreSession(){
+ const {data,error}=await db.auth.getSession();
+ if(error)console.warn(error);
+ if(data?.session){
+  const {data:u}=await db.auth.getUser();
+  if(u?.user){
+   currentUser=u.user;
+   localStorage.setItem('meiho_guide_completed','1');
+   showScreen('app');await initializeApp();return;
+  }
+ }
+ if(localStorage.getItem('meiho_guide_completed')==='1'||localStorage.getItem('meiho_account_created')==='1')showScreen('auth');
+ else showGuide();
+}
+
+async function logout(){
+ if(!confirm('Veux-tu vraiment te déconnecter ?'))return;
+ removeRealtime();
+ const {error}=await db.auth.signOut();
+ if(error){toast('Déconnexion impossible : '+error.message);return}
+ currentUser=null;currentProfile=null;selectedUser=null;selectedConversation=null;isOfficial=false;
+ document.body.classList.remove('chat-open');$('password').value='';$('menuPanel').classList.add('hidden');
+ showScreen('auth');toast('Déconnexion réussie.');
+}
+function removeRealtime(){
+ if(messageSubscription&&db){db.removeChannel(messageSubscription).catch(()=>{});messageSubscription=null;}
+}
+async function initializeApp(){
+ if(!currentUser)return;
+ await loadProfile();
+ await Promise.all([loadProfiles(),loadConversations(),loadChannels(),loadCommunities()]);
+ changeTab('chats');
+}
+async function loadProfile(){
+ const {data,error}=await db.from('profiles').select('*').eq('id',currentUser.id).maybeSingle();
+ if(error)console.warn('Profil:',error.message);
+ if(data)currentProfile=data;
+}
+async function loadProfiles(){
+ const {data,error}=await db.from('profiles').select('id,username,display_name,bio,avatar_url,is_verified,is_official,created_at').order('username');
+ if(error){console.warn('Profils:',error.message);allProfiles=[]}else allProfiles=data||[];
+ renderList();
+}
+async function loadConversations(){
+ const {data,error}=await db.from('conversation_members').select('conversation_id').eq('user_id',currentUser.id);
+ if(error){console.warn('Conversations:',error.message);allConversations=[];renderList();return}
+ const ids=[...new Set((data||[]).map(x=>x.conversation_id))];
+ if(!ids.length){allConversations=[];renderList();return}
+ const result=await db.from('conversations').select('*').in('id',ids).order('created_at',{ascending:false});
+ if(result.error){console.warn(result.error.message);allConversations=[]}else allConversations=result.data||[];
+ renderList();
+}
+async function loadChannels(){
+ const {data,error}=await db.from('channels').select('*').order('created_at',{ascending:false});
+ if(error){console.warn('Actus:',error.message);allChannels=[]}else allChannels=data||[];
+ renderList();
+}
+async function loadCommunities(){
+ const {data,error}=await db.from('communities').select('*').order('created_at',{ascending:false});
+ if(error){console.warn('Communautés:',error.message);allCommunities=[]}else allCommunities=data||[];
+ renderList();
+}
+
+function changeTab(tab){
+ loadVersion++;removeRealtime();activeTab=tab;selectedUser=null;selectedConversation=null;isOfficial=false;
+ document.querySelectorAll('.bottom-nav button').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
+ $('profilePanel').classList.toggle('hidden',!['profile','settings'].includes(tab));
+ $('callPanel').classList.toggle('hidden',tab!=='calls');
+ $('list').classList.toggle('hidden',['profile','settings','calls'].includes(tab));
+ $('searchBox').classList.toggle('hidden',!['users','chats','channels','communities'].includes(tab));
+ $('composer').classList.add('hidden');
+ $('messages').innerHTML='<div class="empty">Choisis un élément pour continuer.</div>';
+ $('chatHeader').innerHTML='<div class="avatar">M</div><strong>M-EI HO</strong>';
+ document.body.classList.remove('chat-open');
+ if(tab==='profile')renderProfile();else if(tab==='settings')renderSettings();else if(tab==='calls')renderCalls();else renderList();
+}
+document.querySelectorAll('.bottom-nav button').forEach(b=>b.onclick=()=>changeTab(b.dataset.tab));
+function menuAction(action){
+ $('menuPanel').classList.add('hidden');
+ if(action==='logout')return logout();
+ if(action==='official')return openOfficial();
+ if(action==='users'){changeTab('users');$('searchBox').classList.remove('hidden');$('search').placeholder='Rechercher un utilisateur...';$('search').focus();return}
+ if(action==='profile')return changeTab('profile');
+ if(action==='settings')return changeTab('settings');
+}
+document.querySelectorAll('#menuPanel button').forEach(b=>b.onclick=()=>menuAction(b.dataset.action));
+$('menuToggle').onclick=()=>$('menuPanel').classList.toggle('hidden');
+document.addEventListener('click',e=>{if(!$('menuWrap').contains(e.target))$('menuPanel').classList.add('hidden')});
+$('searchToggle').onclick=()=>{if(!currentUser)return;changeTab('users');$('searchBox').classList.remove('hidden');$('search').focus()};
+$('search').oninput=renderList;
+
+function renderList(){
+ if(!currentUser||!$('list'))return;
+ const list=$('list');list.innerHTML='';
+ const term=$('search').value.trim().toLowerCase();let items=[];
+ if(activeTab==='users'){
+  items=allProfiles.filter(p=>p.id!==currentUser.id).filter(p=>((p.username||'')+' '+(p.display_name||'')+' '+(p.bio||'')).toLowerCase().includes(term)).map(p=>({title:p.display_name||p.username,subtitle:'@'+p.username+(p.bio?' · '+p.bio:''),avatar:p.avatar_url,verified:p.is_verified,action:()=>openUser(p)}));
+ }else if(activeTab==='chats'){
+  items=allConversations.filter(c=>(c.name||'Discussion').toLowerCase().includes(term)).map(c=>({title:c.name||'Discussion',subtitle:'Ouvrir la discussion',action:()=>openConversation(c)}));
+  items.unshift({title:'M-EI HO Official',subtitle:'Chaîne officielle · Lecture seule',verified:true,action:openOfficial});
+ }else if(activeTab==='channels'){
+  items=allChannels.filter(c=>((c.name||'')+' '+(c.description||'')).toLowerCase().includes(term)).map(c=>({title:c.name,subtitle:c.description||'Chaîne',avatar:c.photo_url,verified:c.is_verified,action:()=>openChannel(c)}));
+  items.unshift({title:'+ Créer une chaîne',subtitle:'Publier une nouvelle chaîne Actus',action:createChannel});
+ }else if(activeTab==='communities'){
+  items=allCommunities.filter(c=>((c.name||'')+' '+(c.description||'')).toLowerCase().includes(term)).map(c=>({title:c.name,subtitle:c.description||'Communauté',avatar:c.photo_url,action:()=>openCommunity(c)}));
+  items.unshift({title:'+ Créer une communauté',subtitle:'Créer un espace communautaire',action:createCommunity});
+ }
+ if(!items.length){list.innerHTML='<div class="empty">'+(activeTab==='users'?'Aucun autre utilisateur trouvé.':'Aucun élément disponible.')+'</div>';return}
+ items.forEach(item=>{
+  const row=document.createElement('div');row.className='row';row.tabIndex=0;
+  const avatar=document.createElement('div');avatar.className='avatar';
+  if(item.avatar){const img=document.createElement('img');img.src=item.avatar;img.alt='';img.onerror=()=>{avatar.innerHTML='';avatar.textContent=(item.title||'M')[0].toUpperCase()};avatar.appendChild(img)}
+  else avatar.textContent=(item.title||'M')[0].toUpperCase();
+  const text=document.createElement('div');text.className='rowtext';
+  const title=document.createElement('strong');title.textContent=item.title||'Sans nom';
+  if(item.verified){const badge=document.createElement('span');badge.className='badge';badge.textContent='✓';title.appendChild(badge)}
+  const sub=document.createElement('small');sub.textContent=item.subtitle||'';text.append(title,sub);row.append(avatar,text);row.onclick=item.action;
+  row.onkeydown=e=>{if(e.key==='Enter')item.action()};list.appendChild(row);
+ });
+}
+function backButton(){
+ const b=document.createElement('button');b.className='secondary back';b.textContent='‹';b.setAttribute('aria-label','Retour');b.onclick=()=>document.body.classList.remove('chat-open');return b;
+}
+function setHeader(title,subtitle,verified=false){
+ const h=$('chatHeader');h.innerHTML='';h.appendChild(backButton());
+ const a=document.createElement('div');a.className='avatar';a.textContent=(title||'M')[0].toUpperCase();
+ const box=document.createElement('div'),strong=document.createElement('strong');strong.textContent=title;
+ if(verified){const badge=document.createElement('span');badge.className='badge';badge.textContent='✓';strong.appendChild(badge)}
+ const small=document.createElement('small');small.className='muted';small.textContent=subtitle||'';box.append(strong,document.createElement('br'),small);h.append(a,box);
+}
+async function openUser(profile){
+ const version=++loadVersion;removeRealtime();selectedUser=profile;selectedConversation=null;isOfficial=false;document.body.classList.add('chat-open');
+ setHeader(profile.display_name||profile.username,'@'+profile.username,profile.is_verified);$('composer').classList.remove('hidden');$('messages').innerHTML='<div class="empty">Ouverture de la discussion...</div>';
+ try{
+  const {data:mine,error}=await db.from('conversation_members').select('conversation_id').eq('user_id',currentUser.id);if(error)throw error;
+  const ids=(mine||[]).map(x=>x.conversation_id);let found=null;
+  if(ids.length){
+   const {data:conversations,error:ce}=await db.from('conversations').select('*').in('id',ids).eq('is_group',false);if(ce)throw ce;
+   for(const c of conversations||[]){
+    const {data:members,error:me}=await db.from('conversation_members').select('user_id').eq('conversation_id',c.id);
+    if(!me&&(members||[]).some(m=>m.user_id===profile.id)){found=c;break}
+   }
+  }
+  if(version!==loadVersion)return;
+  if(!found){
+   const {data:c,error:ce}=await db.from('conversations').insert({name:null,is_group:false,created_by:currentUser.id}).select().single();if(ce)throw ce;
+   const {error:me}=await db.from('conversation_members').insert([{conversation_id:c.id,user_id:currentUser.id},{conversation_id:c.id,user_id:profile.id}]);
+   if(me){await db.from('conversations').delete().eq('id',c.id);throw me}found=c;
+  }
+  if(version!==loadVersion)return;selectedConversation=found;await loadMessages();
+ }catch(e){console.error(e);$('messages').textContent='Impossible d’ouvrir cette discussion : '+e.message}
+}
+async function openConversation(c){
+ loadVersion++;removeRealtime();selectedConversation=c;selectedUser=null;isOfficial=false;document.body.classList.add('chat-open');setHeader(c.name||'Discussion','Discussion');$('composer').classList.remove('hidden');await loadMessages();
+}
+async function loadMessages(){
+ if(!selectedConversation)return;const id=selectedConversation.id;$('messages').innerHTML='<div class="empty">Chargement des messages...</div>';
+ const {data,error}=await db.from('messages').select('*').eq('conversation_id',id).order('created_at',{ascending:true});
+ if(!selectedConversation||selectedConversation.id!==id)return;
+ if(error){$('messages').textContent='Lecture impossible : '+error.message;return}renderMessages(data||[]);subscribeMessages(id);
+}
+function renderMessages(data){
+ const container=$('messages');container.innerHTML='';
+ if(!data.length){container.innerHTML='<div class="empty">Aucun message. Écris le premier !</div>';return}
+ data.forEach(m=>{
+  const b=document.createElement('div');b.className='bubble'+(m.sender_id===currentUser.id?' mine':'');b.textContent=m.content||'';
+  const t=document.createElement('small');const d=new Date(m.created_at);t.textContent=Number.isNaN(d.getTime())?'':d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+  b.appendChild(t);container.appendChild(b);
+ });container.scrollTop=container.scrollHeight;
+}
+function subscribeMessages(id){
+ removeRealtime();messageSubscription=db.channel('messages-'+id).on('postgres_changes',{event:'*',schema:'public',table:'messages',filter:'conversation_id=eq.'+id},()=>{if(selectedConversation?.id===id)loadMessages()}).subscribe();
+}
+async function sendMessage(){
+ if(isOfficial||!selectedConversation||!currentUser){toast('Choisis une discussion.');return}
+ const input=$('messageInput'),content=input.value.trim();if(!content)return;input.disabled=true;
+ try{
+  const {error}=await db.from('messages').insert({conversation_id:selectedConversation.id,sender_id:currentUser.id,content,message_type:'text'});
+  if(error)throw error;input.value='';await loadMessages();
+ }catch(e){toast('Envoi refusé par Supabase : '+e.message)}
+ finally{input.disabled=false;input.focus()}
+}
+$('sendBtn').onclick=sendMessage;
+$('messageInput').onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage()}};
+
+async function openOfficial(){
+ loadVersion++;removeRealtime();selectedConversation=null;selectedUser=null;isOfficial=true;document.body.classList.add('chat-open');setHeader('M-EI HO Official','Chaîne officielle · Lecture seule',true);$('composer').classList.add('hidden');
+ const container=$('messages');container.innerHTML='';
+ const hero=document.createElement('div');hero.className='official-hero';hero.innerHTML='<div class="official-logo">M</div><h2>M-EI HO Official <span class="badge">✓</span></h2><p class="muted">La page officielle de M-EI HO</p><p>M-EI HO : discussions, actualités et communautés.</p>';container.appendChild(hero);
+ const notice=document.createElement('div');notice.id='notice';notice.className='empty';notice.textContent='🔒 Chaîne lecture seule - Personne ne peut envoyer';container.appendChild(notice);
+ try{
+  const {data,error}=await db.from('meiho_announcements').select('*').order('created_at',{ascending:true});if(error)throw error;
+  (data||[]).forEach(m=>{const b=document.createElement('div');b.className='bubble';b.textContent=m.content||m.message||'';container.appendChild(b)});
+ }catch(e){console.warn('Annonces officielles indisponibles:',e.message)}
+}
+async function createChannel(){
+ const name=prompt('Nom de la chaîne :');if(name===null)return;if(name.trim().length<2){toast('Le nom doit contenir au moins 2 caractères.');return}
+ const description=prompt('Description (facultative) :')||'',photo_url=prompt('URL publique de la photo (facultatif) :')||null;
+ try{
+  const {error}=await db.from('channels').insert({name:name.trim(),description:description.trim(),photo_url,owner_id:currentUser.id,is_official:false,is_verified:false});
+  if(error)throw error;await loadChannels();toast('Chaîne créée.');
+ }catch(e){toast('Création de la chaîne impossible : '+e.message)}
+}
+async function openChannel(channel){
+ loadVersion++;removeRealtime();selectedConversation=null;selectedUser=null;isOfficial=true;document.body.classList.add('chat-open');setHeader(channel.name||'Chaîne','Chaîne Actus',channel.is_verified);$('composer').classList.add('hidden');
+ const container=$('messages');container.innerHTML='';
+ if(channel.photo_url){const img=document.createElement('img');img.src=channel.photo_url;img.style.cssText='width:100%;max-height:220px;object-fit:cover;border-radius:12px';container.appendChild(img)}
+ const intro=document.createElement('p');intro.textContent=channel.description||'Chaîne M-EI HO';container.appendChild(intro);
+ try{
+  const {data,error}=await db.from('channel_posts').select('*').eq('channel_id',channel.id).order('created_at',{ascending:true});if(error)throw error;
+  if(!data?.length){container.appendChild(Object.assign(document.createElement('div'),{className:'empty',textContent:'Aucune publication pour le moment.'}));return}
+  data.forEach(p=>{const b=document.createElement('div');b.className='bubble';b.textContent=p.content||'';container.appendChild(b)});
+ }catch(e){const p=document.createElement('p');p.className='note';p.textContent='Publications indisponibles : '+e.message;container.appendChild(p)}
+}
+async function createCommunity(){
+ const name=prompt('Nom de la communauté :');if(name===null)return;if(name.trim().length<2){toast('Le nom doit contenir au moins 2 caractères.');return}
+ const description=prompt('Description (facultative) :')||'',photo_url=prompt('URL publique de la photo (facultatif) :')||null;
+ try{
+  const {error}=await db.from('communities').insert({name:name.trim(),description:description.trim(),photo_url,owner_id:currentUser.id});
+  if(error)throw error;await loadCommunities();toast('Communauté créée.');
+ }catch(e){toast('Création de la communauté impossible : '+e.message)}
+}
+async function openCommunity(c){
+ loadVersion++;removeRealtime();selectedConversation=null;selectedUser=null;isOfficial=true;document.body.classList.add('chat-open');setHeader(c.name||'Communauté',c.description||'Communauté M-EI HO');$('composer').classList.add('hidden');
+ const container=$('messages');container.innerHTML='';
+ if(c.photo_url){const img=document.createElement('img');img.src=c.photo_url;img.style.cssText='width:100%;max-height:220px;object-fit:cover;border-radius:12px';container.appendChild(img)}
+ const card=document.createElement('div');card.className='official-hero';
+ const title=document.createElement('h2');title.textContent=c.name||'Communauté';const desc=document.createElement('p');desc.textContent=c.description||'Bienvenue dans cette communauté.';
+ const info=document.createElement('p');info.className='note';info.textContent='Les membres et les publications nécessitent les tables et les règles Supabase correspondantes.';
+ card.append(title,desc,info);container.appendChild(card);
+}
+function renderProfile(){
+ const panel=$('profilePanel');panel.innerHTML='';const p=currentProfile||{};
+ const h=document.createElement('h2');h.textContent=p.display_name||p.username||currentUser.user_metadata?.username||'Mon profil';
+ if(p.is_verified){const b=document.createElement('span');b.className='badge';b.textContent='✓';h.appendChild(b)}panel.appendChild(h);
+ if(p.avatar_url){const img=document.createElement('img');img.src=p.avatar_url;img.style.cssText='width:85px;height:85px;object-fit:cover;border-radius:50%';panel.appendChild(img)}
+ const form=document.createElement('form');
+ form.innerHTML='<label>Nom affiché</label><input id="displayName" maxlength="60"><label>Bio</label><textarea id="profileBio" maxlength="160"></textarea><label>Nouvelle photo (facultative)</label><input id="profilePhoto" type="file" accept="image/*"><button class="primary" type="submit">Enregistrer le profil</button>';
+ panel.appendChild(form);$('displayName').value=p.display_name||p.username||'';$('profileBio').value=p.bio||'';
+ form.onsubmit=async e=>{
+  e.preventDefault();
+  try{
+   const changes={display_name:$('displayName').value.trim()||p.username,bio:$('profileBio').value.trim(),updated_at:new Date().toISOString()};
+   const file=$('profilePhoto').files[0];if(file){if(file.size>8*1024*1024)throw new Error('Photo trop volumineuse.');changes.avatar_url=await resizeImage(file)}
+   const {error}=await db.from('profiles').update(changes).eq('id',currentUser.id);if(error)throw error;
+   await loadProfile();await loadProfiles();renderProfile();toast('Profil mis à jour.');
+  }catch(error){toast('Modification impossible : '+error.message)}
+ };
+ const note=document.createElement('p');note.className='note';note.textContent='Le badge de vérification est attribué côté serveur.';panel.appendChild(note);
+}
+function renderCalls(){$('callPanel').innerHTML='<h2>Appels</h2><div class="empty">Les appels audio et vidéo en direct nécessitent une infrastructure de communication dédiée.</div>'}
+function renderSettings(){
+ $('profilePanel').innerHTML='<h2>Paramètres</h2><p class="note">Ton compte est géré par Supabase. Le badge de vérification ne peut pas être activé depuis ce menu.</p>';
+ const btn=document.createElement('button');btn.className='secondary';btn.textContent='Revoir le guide de bienvenue';btn.onclick=()=>{localStorage.removeItem('meiho_guide_completed');showGuide()};$('profilePanel').appendChild(btn);
+ const logoutBtn=document.createElement('button');logoutBtn.className='secondary';logoutBtn.textContent='Se déconnecter';logoutBtn.style.marginLeft='8px';logoutBtn.onclick=logout;$('profilePanel').appendChild(logoutBtn);
+}
+async function startApplication(){
+ try{
+  if(!window.supabase?.createClient){showScreen('auth');$('authStatus').textContent='Supabase ne se charge pas. Vérifie ta connexion Internet.';return}
+  db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+  db.auth.onAuthStateChange((_event,session)=>{if(session)currentUser=session.user});
+  await restoreSession();
+ }catch(e){console.error(e);showScreen('auth');$('authStatus').textContent='Erreur de démarrage : '+e.message}
+}
+
+/* Enregistrement du Service Worker PWA */
+if ('serviceWorker' in navigator) {
+ window.addEventListener('load', async () => {
+  try {
+   const registration = await navigator.serviceWorker.register(
+    '/m-ei-ho-messengerie/sw.js',
+    {scope:'/m-ei-ho-messengerie/'}
+   );
+   console.log('M-EI HO Service Worker connecté :',registration.scope);
+  } catch(error) {
+   console.error('Erreur Service Worker :',error);
+  }
+ });
+}
+
+startApplication();
+</script>
+</body>
+  </html>
